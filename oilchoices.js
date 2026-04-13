@@ -1,813 +1,227 @@
 /* ══════════════════════════════════════════════
-   OILCHOICES.COM — Complete CSS v7.1 STABLE
-   GitHub: medonid/oilchoices-assets
+   OILCHOICES.COM — Header JS v6.2 ROBUST
+   Rewritten for safer boot, about link, EV fallback,
+   missing-model panel, stable sticky offset
 ══════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var D=document, W=window;
+  var booted=false;
+  var bootTries=0;
+  var BOOT_MAX=80;
 
-/* ── Base Reset ── */
-html {
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box;
-}
-body {
-  margin: 0 !important;
-  width: 100% !important;
-  box-sizing: border-box;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-img, video {
-  height: auto;
-  display: block;
-}
+  var MAKES=["Acura","Alfa Romeo","Audi","BMW","Buick","Cadillac","Chevrolet",
+    "Chrysler","Dodge","Ford","GMC","Honda","Hyundai","Infiniti","Jeep","Kia",
+    "Land Rover","Lexus","Lincoln","Mazda","Mercedes-Benz","Mitsubishi","Nissan",
+    "Ram","Subaru","Tesla","Toyota","Volkswagen","Volvo"];
 
-/* ══════════════════════════════════════════════
-   CSS VARIABLES
-══════════════════════════════════════════════ */
-:root {
-  --oc-nb-h: 0px;
-  --oc-red:   #BF0A30;
-  --oc-red2:  #e8143a;
-  --oc-navy:  #0A1628;
-  --oc-navy2: #0d1f3c;
-}
+  var MODELS={
+    "Acura":["ILX","MDX","RDX","TLX","ZDX"],
+    "Alfa Romeo":["Giulia","Stelvio","Tonale"],
+    "Audi":["A3","A4","A5","A6","Q3","Q5","Q7","Q8","e-tron"],
+    "BMW":["2 Series","3 Series","4 Series","5 Series","7 Series","M3","M5","X1","X3","X5","X7","iX"],
+    "Buick":["Enclave","Encore","Encore GX","Envision"],
+    "Cadillac":["CT4","CT5","Escalade","XT4","XT5","XT6","Lyriq"],
+    "Chevrolet":["Blazer","Camaro","Colorado","Equinox","Malibu","Silverado 1500","Silverado 2500HD","Suburban","Tahoe","Traverse","Trax"],
+    "Chrysler":["300","Pacifica","Pacifica Hybrid"],
+    "Dodge":["Challenger","Charger","Durango","Hornet"],
+    "Ford":["Bronco","Edge","Escape","Explorer","Expedition","F-150","F-250 Super Duty","Maverick","Mustang","Ranger","Transit"],
+    "GMC":["Acadia","Canyon","Sierra 1500","Sierra 2500HD","Terrain","Yukon"],
+    "Honda":["Accord","CR-V","Civic","HR-V","Odyssey","Passport","Pilot","Ridgeline"],
+    "Hyundai":["Elantra","Ioniq 5","Ioniq 6","Kona","Palisade","Santa Fe","Sonata","Tucson"],
+    "Infiniti":["Q50","Q60","QX50","QX60","QX80"],
+    "Jeep":["Cherokee","Compass","Gladiator","Grand Cherokee","Renegade","Wrangler"],
+    "Kia":["Carnival","EV6","EV9","Forte","K5","Sorento","Soul","Sportage","Telluride"],
+    "Land Rover":["Defender","Discovery","Discovery Sport","Range Rover","Range Rover Sport"],
+    "Lexus":["ES","GX","IS","LX","NX","RX","UX"],
+    "Lincoln":["Aviator","Corsair","Nautilus","Navigator"],
+    "Mazda":["CX-30","CX-5","CX-50","CX-90","Mazda3","Mazda6","MX-5 Miata"],
+    "Mercedes-Benz":["A-Class","C-Class","E-Class","GLC","GLE","GLS","S-Class","Sprinter"],
+    "Mitsubishi":["Eclipse Cross","Mirage","Outlander","Outlander PHEV"],
+    "Nissan":["Altima","Armada","Frontier","Murano","Pathfinder","Rogue","Sentra","Titan","Versa"],
+    "Ram":["1500","2500","3500","ProMaster"],
+    "Subaru":["Ascent","BRZ","Crosstrek","Forester","Impreza","Legacy","Outback","WRX"],
+    "Tesla":["Cybertruck","Model 3","Model S","Model X","Model Y"],
+    "Toyota":["4Runner","Camry","Corolla","Crown","GR86","Highlander","Land Cruiser","Prius","RAV4","RAV4 Hybrid","Sequoia","Sienna","Supra","Tacoma","Tundra","Venza"],
+    "Volkswagen":["Atlas","Golf","GTI","ID.4","Jetta","Taos","Tiguan"],
+    "Volvo":["S60","S90","V60","V90","XC40","XC60","XC90"]
+  };
 
-/* ══════════════════════════════════════════════
-   NOTICE BAR
-══════════════════════════════════════════════ */
-#oc-nb {
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 9px 18px !important;
-  background: linear-gradient(90deg, #002868, #0d1f3c 60%, #002868);
-  color: #fff;
-  text-align: center;
-  font-size: 13.5px;
-  font-weight: 700;
-  border-bottom: 2px solid #BF0A30;
-  box-shadow: 0 2px 10px rgba(0,0,0,.20);
-  transition: padding .3s, font-size .3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.4;
-  box-sizing: border-box;
-}
-#oc-nb.compact {
-  padding: 6px 18px !important;
-  font-size: 12px;
-}
-#oc-nb a {
-  color: #ffaabb;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-/* ══════════════════════════════════════════════
-   SCROLL PROGRESS BAR
-══════════════════════════════════════════════ */
-#oc-prog {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 0% !important;
-  height: 3px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: linear-gradient(90deg, #002868 0%, #BF0A30 45%, #fff 75%, #BF0A30 100%);
-  z-index: 999999 !important;
-  pointer-events: none !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  overflow: visible !important;
-  transform: none !important;
-  transition: width .1s linear;
-}
-
-/* ══════════════════════════════════════════════
-   MAIN HEADER SHELL
-══════════════════════════════════════════════ */
-#oc-hdr {
-  position: sticky;
-  top: var(--oc-nb-h);
-  z-index: 9998;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: visible !important;
-  background: linear-gradient(135deg,
-    rgba(10,22,40,.99),
-    rgba(13,31,60,.98) 55%,
-    rgba(20,42,78,.97));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(191,10,48,.22);
-  box-shadow: 0 8px 32px rgba(0,0,0,.28);
-  transition: box-shadow .3s;
-  box-sizing: border-box;
-}
-#oc-hdr::after {
-  content: '';
-  position: absolute;
-  left: 0; bottom: 0;
-  width: 100%; height: 2px;
-  background: linear-gradient(90deg,
-    #002868 0%,  #002868 33%,
-    #BF0A30 33%, #BF0A30 66%,
-    #002868 66%, #002868 100%);
-}
-#oc-hdr.scrolled { box-shadow: 0 12px 42px rgba(0,0,0,.36); }
-
-/* ── Row 1 ── */
-.oc-r1 {
-  max-width: 1380px !important;
-  width: 100% !important;
-  margin: 0 auto !important;
-  padding: 12px 24px !important;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  transition: padding .3s;
-  box-sizing: border-box;
-}
-#oc-hdr.scrolled .oc-r1 {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
-
-/* ── Brand ── */
-.oc-brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  text-decoration: none;
-  min-width: max-content;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-/* ── Logo Badge ── */
-.oc-badge {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(160deg, #fff 0%, #f4f7ff 55%, #fff4f6 100%);
-  border-radius: 16px;
-  padding: 8px 12px;
-  border-top: 3px solid #002868;
-  border-bottom: 2px solid #BF0A30;
-  border-left: 1px solid rgba(0,40,104,.18);
-  border-right: 1px solid rgba(191,10,48,.18);
-  box-shadow: 0 14px 30px rgba(10,22,40,.28), inset 0 1px 0 rgba(255,255,255,.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: padding .3s;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-badge::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,.55), transparent);
-  border-radius: 14px 14px 0 0;
-  pointer-events: none;
-}
-.oc-badge img {
-  height: 54px !important;
-  width: auto !important;
-  display: block;
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,.12));
-  transition: height .3s;
-}
-#oc-hdr.scrolled .oc-badge     { padding: 6px 10px; }
-#oc-hdr.scrolled .oc-badge img { height: 44px !important; }
-
-/* ── Brand Text ── */
-.oc-btext {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-btitle {
-  color: #fff;
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  transition: font-size .3s;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-#oc-hdr.scrolled .oc-btitle { font-size: 22px; }
-.oc-bsub {
-  color: rgba(255,154,170,.92);
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 1.1px;
-  text-transform: uppercase;
-  margin-top: 2px !important;
-  width: auto !important;
-  max-width: none !important;
-}
-
-/* ── Mobile Toggle ── */
-.oc-tog {
-  display: none;
-  margin-left: auto !important;
-  width: 46px !important;
-  max-width: 46px !important;
-  height: 46px;
-  border: 1px solid rgba(191,10,48,.35);
-  background: rgba(255,255,255,.05);
-  color: #ffaabb;
-  border-radius: 13px;
-  cursor: pointer;
-  font-size: 20px;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ── Nav Wrap ── */
-.oc-nwrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1 !important;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-/* ── Nav ── */
-.oc-nav {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-wrap: wrap;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-/* ── Nav Links & Dropdown Toggles ── */
-.oc-lnk, .oc-dtog {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: .55px;
-  padding: 9px 11px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-  transition: background .22s, color .22s, transform .18s, border-color .22s;
-}
-.oc-lnk:hover, .oc-dtog:hover {
-  background: rgba(191,10,48,.14);
-  border-color: rgba(191,10,48,.28);
-  color: #ffaabb;
-  transform: translateY(-1px);
-}
-.oc-lnk.active, .oc-dtog.active {
-  background: linear-gradient(180deg, rgba(191,10,48,.18), rgba(191,10,48,.08));
-  border-color: rgba(191,10,48,.28);
-  color: #ffaabb;
-}
-/* ── Dropdown ── */
-.oc-dd {
-  position: relative !important;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-ddm {
-  position: absolute !important;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 242px !important;
-  min-width: 242px !important;
-  max-width: 320px !important;
-  margin: 0 !important;
-  background: linear-gradient(180deg, #fff, #f4f7ff);
-  border: 1px solid rgba(0,40,104,.12);
-  border-top: 3px solid #BF0A30;
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 20px 50px rgba(10,22,40,.22);
-  display: none;
-  z-index: 100010;
-  animation: ocIn .18s ease;
-}
-@keyframes ocIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-.oc-dd.open .oc-ddm { display: block; }
-
-.oc-ddt {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #002868;
-  border-bottom: 1px solid rgba(191,10,48,.18);
-  padding-bottom: 8px;
-  margin: 0 0 9px 0 !important;
-  width: auto !important;
-  max-width: none !important;
-}
-.oc-ddl {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-ddl a {
-  color: #0d1f3c;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 9px 12px;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-  transition: background .18s, color .18s, padding-left .18s;
-}
-.oc-ddl a::before {
-  content: '';
-  width: 4px !important;
-  height: 4px;
-  border-radius: 50%;
-  background: #BF0A30;
-  flex-shrink: 0;
-}
-.oc-ddl a:hover {
-  background: rgba(191,10,48,.10);
-  color: #BF0A30;
-  padding-left: 16px;
-}
-
-/* ── Search ── */
-.oc-srch {
-  position: relative !important;
-  width: 230px !important;
-  max-width: 230px !important;
-  min-width: 160px !important;
-  margin: 0 !important;
-}
-.oc-srch input {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 46px;
-  border: 1px solid rgba(191,10,48,.25);
-  outline: 0;
-  border-radius: 999px;
-  padding: 0 48px 0 17px;
-  font-size: 13px;
-  background: rgba(255,255,255,.97);
-  color: #0d1f3c;
-  box-shadow: 0 6px 16px rgba(10,22,40,.14);
-  transition: border-color .22s, box-shadow .22s;
-  margin: 0 !important;
-  box-sizing: border-box;
-}
-.oc-srch input:focus {
-  border-color: rgba(191,10,48,.55);
-  box-shadow: 0 6px 16px rgba(10,22,40,.14), 0 0 0 3px rgba(191,10,48,.14);
-}
-.oc-srch input::placeholder { color: #6a7a9b; font-weight: 600; }
-.oc-srch button {
-  position: absolute !important;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px !important;
-  max-width: 36px !important;
-  height: 36px;
-  border-radius: 50%;
-  border: 0;
-  cursor: pointer;
-  font-size: 15px;
-  color: #fff;
-  background: linear-gradient(135deg, #BF0A30, #e8143a);
-  box-shadow: 0 4px 12px rgba(191,10,48,.40);
-  transition: transform .18s;
-  margin: 0 !important;
-}
-.oc-srch button:hover { transform: translateY(-50%) scale(1.09); }
-
-/* ── CTA Button ── */
-.oc-cta {
-  text-decoration: none;
-  color: #fff;
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: .7px;
-  padding: 12px 18px;
-  border-radius: 999px;
-  white-space: nowrap;
-  background: linear-gradient(135deg, #BF0A30, #e8143a);
-  box-shadow: 0 8px 20px rgba(191,10,48,.40);
-  border: 1px solid rgba(255,255,255,.18);
-  transition: transform .22s, box-shadow .22s;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 13px 28px rgba(191,10,48,.50);
-}
-
-/* ══════════════════════════════════════════════
-   YMM ROW
-══════════════════════════════════════════════ */
-.oc-ymm {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  background: linear-gradient(90deg,
-    rgba(0,40,104,.22) 0%,
-    rgba(191,10,48,.12) 50%,
-    rgba(0,40,104,.18) 100%);
-  border-top: 1px solid rgba(191,10,48,.18);
-  padding: 9px 24px !important;
-  transition: padding .3s;
-  box-sizing: border-box;
-}
-#oc-hdr.scrolled .oc-ymm {
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
-}
-.oc-ymm-in {
-  max-width: 1380px !important;
-  width: 100% !important;
-  margin: 0 auto !important;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-.oc-ymm-lbl {
-  color: rgba(255,170,187,.95);
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: .6px;
-  white-space: nowrap;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-ymm-in select {
-  height: 38px;
-  border-radius: 9px;
-  border: 1px solid rgba(191,10,48,.32);
-  background: rgba(255,255,255,.97);
-  color: #0d1f3c;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 0 10px;
-  cursor: pointer;
-  flex: 1;
-  min-width: 80px;
-  max-width: 158px !important;
-  margin: 0 !important;
-  transition: border-color .2s, box-shadow .2s;
-}
-.oc-ymm-in select:focus {
-  outline: 0;
-  border-color: #BF0A30;
-  box-shadow: 0 0 0 3px rgba(191,10,48,.16);
-}
-.oc-ymm-btn {
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 9px;
-  border: none;
-  background: linear-gradient(135deg, #BF0A30, #e8143a);
-  color: #fff;
-  font-weight: 900;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 0 5px 14px rgba(191,10,48,.40);
-  transition: transform .18s, box-shadow .18s;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.oc-ymm-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(191,10,48,.55);
-}
-
-/* ══════════════════════════════════════════════
-   SPEC RESULT PANEL
-══════════════════════════════════════════════ */
-#oc-spec-panel {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 10px 24px !important;
-  box-sizing: border-box;
-  background: linear-gradient(90deg,
-    rgba(0,40,104,.22),
-    rgba(191,10,48,.10),
-    rgba(0,40,104,.18));
-  border-top: 1px solid rgba(191,10,48,.28);
-  animation: ocPanelIn .22s ease;
-}
-@keyframes ocPanelIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-#oc-spec-panel > div {
-  max-width: 1380px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 4px 0;
-}
-.oc-sp-veh {
-  color: #ffaabb;
-  font-size: 12px;
-  font-weight: 900;
-  white-space: nowrap;
-  letter-spacing: .4px;
-  margin-right: 4px;
-}
-.oc-sp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,.96);
-  border-radius: 7px;
-  padding: 5px 11px;
-  white-space: nowrap;
-  margin: 2px 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-.oc-sp-pill-lbl {
-  font-size: 9.5px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-}
-.oc-sp-pill-val {
-  font-size: 13px;
-  font-weight: 800;
-  color: #0A1628;
-}
-.oc-sp-link {
-  color: #ffaabb;
-  font-size: 11.5px;
-  font-weight: 800;
-  text-decoration: underline;
-  white-space: nowrap;
-  margin-left: auto;
-  letter-spacing: .3px;
-}
-.oc-sp-link:hover { color: #fff; }
-.oc-sp-close {
-  background: none;
-  border: none;
-  color: rgba(255,170,187,.6);
-  cursor: pointer;
-  font-size: 17px;
-  padding: 0 4px;
-  line-height: 1;
-  transition: color .18s;
-}
-.oc-sp-close:hover { color: #ffaabb; }
-#oc-spec-panel.oc-sp-err {
-  background: linear-gradient(90deg,
-    rgba(191,10,48,.18),
-    rgba(191,10,48,.08),
-    rgba(191,10,48,.14));
-}
-#oc-spec-panel.oc-sp-err span {
-  color: #ffaabb;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-/* ══════════════════════════════════════════════
-   BACK TO TOP
-══════════════════════════════════════════════ */
-#oc-btt {
-  position: fixed !important;
-  bottom: 20px !important;
-  right: 20px !important;
-  width: 48px !important;
-  max-width: 48px !important;
-  height: 48px !important;
-  border: 1px solid rgba(191,10,48,.30);
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0A1628, #0d1f3c);
-  color: #ffaabb;
-  cursor: pointer;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 22px rgba(0,0,0,.24);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(12px) scale(.95);
-  transition: opacity .26s, transform .26s, visibility .26s, background .22s;
-  z-index: 999998 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
-#oc-btt.show {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) scale(1) !important;
-}
-#oc-btt:hover { background: linear-gradient(135deg, #BF0A30, #0d1f3c); }
-#oc-btt svg {
-  width: 20px !important;
-  height: 20px !important;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ══════════════════════════════════════════════
-   HIDE NATIVE HEADERS
-══════════════════════════════════════════════ */
-.oc-kill {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-}
-
-/* ══════════════════════════════════════════════
-   HOSTINGER FULL WIDTH FIX
-══════════════════════════════════════════════ */
-.block-layout,
-.block-layout--layout,
-[class*="grid-container"],
-[class*="zyro-"],
-[class*="builder-block"],
-[class*="section__"],
-[class*="is-section"],
-.main-layout,
-.layout-wrapper,
-.page-wrapper,
-.site-wrapper {
-  max-width: 100vw !important;
-  width: 100% !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  box-sizing: border-box !important;
-}
-section img,
-section video,
-.block-layout img,
-.block-layout video {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto;
-  display: block;
-}
-
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .oc-srch { width: 185px !important; max-width: 185px !important; }
-  .oc-lnk, .oc-dtog { font-size: 11px; padding: 8px 9px; }
-}
-
-@media (max-width: 960px) {
-  .oc-tog { display: inline-flex !important; }
-  .oc-r1 {
-    flex-wrap: nowrap;
-    padding: 12px 14px !important;
-    justify-content: space-between;
-  }
-  .oc-r1 .oc-nwrap { display: none !important; }
-  .oc-nwrap.open {
-    display: flex !important;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 10px 14px 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: linear-gradient(180deg, rgba(10,22,40,.99), rgba(13,31,60,.98));
-    border-top: 1px solid rgba(191,10,48,.15);
-  }
-  .oc-r1.mopen { flex-wrap: wrap !important; }
-  .oc-nav { flex-direction: column; align-items: stretch; gap: 4px; }
-  .oc-lnk, .oc-dtog {
-    width: 100% !important;
-    max-width: 100% !important;
-    justify-content: space-between;
-    background: rgba(255,255,255,.05);
-    border-radius: 13px;
-    font-size: 13px;
-  }
-  .oc-dd  { width: 100% !important; max-width: 100% !important; }
-  .oc-ddm {
-    position: static !important;
-    transform: none !important;
-    left: 0;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    margin-top: 6px !important;
-    border-radius: 13px;
-    box-shadow: none;
-    animation: none;
-  }
-  .oc-srch { width: 100% !important; max-width: 100% !important; }
-  .oc-cta  { width: 100% !important; max-width: 100% !important; text-align: center; }
-  .oc-ymm-in select { max-width: none !important; flex: 1 1 44% !important; }
-  .oc-ymm-btn { width: 100% !important; max-width: 100% !important; }
-  .oc-ymm { padding: 8px 14px !important; }
-  #oc-spec-panel { padding: 8px 14px !important; }
-  #oc-spec-panel > div { gap: 6px; }
-  .oc-sp-link { margin-left: 0; }
-  .block-layout,
-  .block-layout--layout,
-  [class*="zyro-"],
-  [class*="builder-block"],
-  [class*="section__"],
-  .main-layout,
-  .page-wrapper {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-@media (max-width: 640px) {
-  #oc-nb { font-size: 12px; padding: 8px 12px !important; }
-  .oc-btitle { font-size: 22px !important; }
-  .oc-badge img { height: 46px !important; }
-  .oc-r1  { padding: 10px 12px !important; }
-  .oc-ymm { padding: 8px 12px !important; }
-  #oc-spec-panel { padding: 8px 12px !important; }
-  .oc-sp-pill { padding: 4px 8px; }
-  .oc-sp-pill-val { font-size: 12px; }
-  #oc-btt {
-    width: 44px !important;
-    max-width: 44px !important;
-    height: 44px !important;
-    bottom: 14px !important;
-    right: 14px !important;
-  }
-}
+  var DB={
+    'Ford':{
+      'F-150':         {capacity:'5.7 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'FL-820S'},
+      'Mustang':       {capacity:'8.0 qt',viscosity:'5W-50', interval:'7,500 mi', api:'API SP',       filter:'FL-400S'},
+      'Explorer':      {capacity:'6.0 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'FL-910S'},
+      'Edge':          {capacity:'5.5 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SQ',       filter:'FL-500S'},
+      'Bronco':        {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'FL-820S'},
+      'Escape':        {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'FL-910S'},
+      'Ranger':        {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'FL-820S'},
+      'Expedition':    {capacity:'7.5 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'FL-910S'},
+      'Maverick':      {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'FL-910S'},
+      'Transit':       {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'FL-820S'}
+    },
+    'Chevrolet':{
+      'Silverado 1500':{capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Equinox':       {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Malibu':        {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SQ',       filter:'PF-64'},
+      'Colorado':      {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Camaro':        {capacity:'7.5 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-48'},
+      'Blazer':        {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Tahoe':         {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Suburban':      {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Traverse':      {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Trax':          {capacity:'4.2 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-64'}
+    },
+    'Toyota':{
+      'Camry':         {capacity:'4.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP/GF-6A', filter:'90915-YZZD2'},
+      'Corolla':       {capacity:'4.4 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP/GF-6A', filter:'90915-YZZD4'},
+      'RAV4':          {capacity:'4.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP/GF-6A', filter:'90915-YZZD2'},
+      'RAV4 Hybrid':   {capacity:'4.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP/GF-6A', filter:'90915-YZZD2'},
+      'Tacoma':        {capacity:'5.5 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZE2'},
+      '4Runner':       {capacity:'6.2 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZE2'},
+      'Highlander':    {capacity:'5.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'},
+      'Tundra':        {capacity:'7.2 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZF4'},
+      'Prius':         {capacity:'4.4 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP/GF-6A', filter:'90915-YZZD4'},
+      'Sienna':        {capacity:'5.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'}
+    },
+    'Honda':{
+      'Civic':         {capacity:'3.4 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SQ/GF-7A', filter:'15400-PLM-A02'},
+      'Accord':        {capacity:'3.7 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SQ/GF-7A', filter:'15400-RTA-003'},
+      'CR-V':          {capacity:'3.7 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-RTA-003'},
+      'Pilot':         {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-RTA-003'},
+      'HR-V':          {capacity:'3.4 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-PLM-A02'},
+      'Odyssey':       {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-RTA-003'},
+      'Ridgeline':     {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-RTA-003'},
+      'Passport':      {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'15400-RTA-003'}
+    },
+    'BMW':{
+      '3 Series':      {capacity:'5.3 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'},
+      '5 Series':      {capacity:'6.9 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'},
+      'X3':            {capacity:'5.3 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'},
+      'X5':            {capacity:'6.9 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'},
+      'M3':            {capacity:'6.9 qt',viscosity:'10W-60',interval:'7,500 mi', api:'BMW M',        filter:'11428507683'},
+      'M5':            {capacity:'8.5 qt',viscosity:'10W-60',interval:'7,500 mi', api:'BMW M',        filter:'11428507683'},
+      'X1':            {capacity:'5.3 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'},
+      'X7':            {capacity:'6.9 qt',viscosity:'0W-30', interval:'10,000 mi',api:'BMW LL-17',    filter:'11428507683'}
+    },
+    'Mercedes-Benz':{
+      'C-Class':       {capacity:'5.5 qt',viscosity:'0W-20', interval:'10,000 mi',api:'MB 229.71',    filter:'A6511800009'},
+      'E-Class':       {capacity:'6.9 qt',viscosity:'0W-20', interval:'10,000 mi',api:'MB 229.71',    filter:'A6511800009'},
+      'GLC':           {capacity:'5.5 qt',viscosity:'0W-20', interval:'10,000 mi',api:'MB 229.71',    filter:'A6511800009'},
+      'GLE':           {capacity:'8.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'MB 229.51',    filter:'A6421800009'},
+      'S-Class':       {capacity:'8.5 qt',viscosity:'0W-40', interval:'10,000 mi',api:'MB 229.71',    filter:'A2761800009'},
+      'GLS':           {capacity:'8.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'MB 229.51',    filter:'A6421800009'},
+      'Sprinter':      {capacity:'8.5 qt',viscosity:'5W-30', interval:'10,000 mi',api:'MB 229.51',    filter:'A6421800009'}
+    },
+    'Dodge':{
+      'Challenger':    {capacity:'7.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Charger':       {capacity:'7.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Durango':       {capacity:'6.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Hornet':        {capacity:'4.5 qt',viscosity:'0W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'}
+    },
+    'Nissan':{
+      'Altima':        {capacity:'4.3 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-9E01A'},
+      'Rogue':         {capacity:'3.9 qt',viscosity:'0W-20', interval:'5,000 mi', api:'API SP',       filter:'15208-65F0A'},
+      'Pathfinder':    {capacity:'5.8 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-9E01A'},
+      'Frontier':      {capacity:'5.4 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-9E01A'},
+      'Armada':        {capacity:'6.2 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-9E01A'},
+      'Murano':        {capacity:'4.3 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-65F0A'},
+      'Sentra':        {capacity:'3.9 qt',viscosity:'0W-20', interval:'5,000 mi', api:'API SP',       filter:'15208-65F0A'},
+      'Titan':         {capacity:'6.5 qt',viscosity:'5W-30', interval:'5,000 mi', api:'API SP',       filter:'15208-9E01A'},
+      'Versa':         {capacity:'3.5 qt',viscosity:'0W-20', interval:'5,000 mi', api:'API SP',       filter:'15208-65F0A'}
+    },
+    'Jeep':{
+      'Wrangler':      {capacity:'5.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Grand Cherokee':{capacity:'5.9 qt',viscosity:'0W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Gladiator':     {capacity:'5.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Compass':       {capacity:'4.5 qt',viscosity:'0W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Cherokee':      {capacity:'5.5 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'Renegade':      {capacity:'4.0 qt',viscosity:'0W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'}
+    },
+    'Subaru':{
+      'Outback':       {capacity:'5.1 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'Forester':      {capacity:'5.1 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'Crosstrek':     {capacity:'5.1 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'Ascent':        {capacity:'5.1 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'Impreza':       {capacity:'4.2 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'Legacy':        {capacity:'5.1 qt',viscosity:'0W-20', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'WRX':           {capacity:'5.1 qt',viscosity:'5W-30', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'},
+      'BRZ':           {capacity:'4.2 qt',viscosity:'5W-30', interval:'6,000 mi', api:'API SP',       filter:'15208AA170'}
+    },
+    'Hyundai':{
+      'Elantra':       {capacity:'4.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SN',       filter:'26300-35504'},
+      'Sonata':        {capacity:'5.1 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Tucson':        {capacity:'4.7 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Santa Fe':      {capacity:'5.1 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Palisade':      {capacity:'6.6 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'26300-35505'},
+      'Kona':          {capacity:'4.2 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'}
+    },
+    'Kia':{
+      'Forte':         {capacity:'4.2 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SN',       filter:'26300-35504'},
+      'K5':            {capacity:'5.1 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Sportage':      {capacity:'4.7 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Sorento':       {capacity:'5.1 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'},
+      'Telluride':     {capacity:'6.6 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'26300-35505'},
+      'Carnival':      {capacity:'6.6 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'26300-35505'},
+      'Soul':          {capacity:'4.2 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'26300-35504'}
+    },
+    'Ram':{
+      '1500':          {capacity:'8.0 qt',viscosity:'0W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      '2500':          {capacity:'8.0 qt',viscosity:'5W-40', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      '3500':          {capacity:'8.0 qt',viscosity:'5W-40', interval:'8,000 mi', api:'API SP',       filter:'MO-090'},
+      'ProMaster':     {capacity:'5.0 qt',viscosity:'5W-20', interval:'8,000 mi', api:'API SP',       filter:'MO-090'}
+    },
+    'GMC':{
+      'Sierra 1500':   {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Sierra 2500HD': {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Yukon':         {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Terrain':       {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Acadia':        {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'Canyon':        {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'}
+    },
+    'Audi':{
+      'A3':            {capacity:'4.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'A4':            {capacity:'5.7 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'A6':            {capacity:'6.4 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06E115403P'},
+      'Q5':            {capacity:'5.7 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'Q7':            {capacity:'6.4 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06E115403P'},
+      'Q8':            {capacity:'6.4 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06E115403P'}
+    },
+    'Volkswagen':{
+      'Jetta':         {capacity:'4.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'Tiguan':        {capacity:'5.7 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'Atlas':         {capacity:'6.4 qt',viscosity:'5W-30', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'Golf':          {capacity:'4.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'GTI':           {capacity:'4.5 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'},
+      'Taos':          {capacity:'5.0 qt',viscosity:'5W-40', interval:'10,000 mi',api:'VW 502.00',    filter:'06J115403Q'}
+    },
+    'Lexus':{
+      'RX':            {capacity:'5.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'},
+      'NX':            {capacity:'4.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'},
+      'ES':            {capacity:'4.8 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'},
+      'IS':            {capacity:'5.3 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD2'},
+      'GX':            {capacity:'6.2 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZE2'},
+      'LX':            {capacity:'7.4 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZF4'},
+      'UX':            {capacity:'4.2 qt',viscosity:'0W-20', interval:'10,000 mi',api:'API SP',       filter:'90915-YZZD4'}
+    },
+    'Lincoln':{
+      'Navigator':     {capacity:'7.5 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'FL-910S'},
+      'Aviator':       {capacity:'6.0 qt',viscosity:'5W-30', interval:'10,000 mi',api:'API SP',       filter:'FL-910S'},
+      'Nautilus':      {capacity:'5.5 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'FL-500S'},
+      'Corsair':       {capacity:'4.5 qt',viscosity:'5W-20', interval:'7,500 mi', api:'API SP',       filter:'FL-910S'}
+    },
+    'Cadillac':{
+      'Escalade':      {capacity:'8.0 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'CT5':           {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'CT4':           {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'XT5':           {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'XT6':           {capacity:'6.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'},
+      'XT4':           {capacity:'5.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PF-63E'}
+    },
+    'Mazda':{
+      'Mazda3':        {capacity:'4.5 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PE01-14-302'},
+      'CX-5':          {capacity:'4.5 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PE01-14-302'},
+      'CX-50':         {capacity:'4.5 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'PE01-14-302'},
       'CX-90':         {capacity:'5.8 qt',viscosity:'0W-20', interval:'7,500 mi', api:'API SP',       filter:'SH0114302'},
       'Mazda6':        {capacity:'4.5 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PE01-14-302'},
       'MX-5 Miata':    {capacity:'4.0 qt',viscosity:'5W-30', interval:'7,500 mi', api:'API SP',       filter:'PE01-14-302'},
@@ -815,7 +229,6 @@ section video,
     }
   };
 
-  /* ══ EV / NON-ENGINE-OIL FALLBACKS ══ */
   function getFallbackSpecs(make, model){
     var evMap={
       'Audi':{'e-tron':1},
@@ -839,8 +252,6 @@ section video,
     return null;
   }
 
-
-  /* ══ HELPERS ══ */
   function _dd(label,title,links){
     return '<div class="oc-dd">'+
       '<button class="oc-dtog" type="button" aria-expanded="false">'+label+' &#9662;</button>'+
@@ -852,16 +263,13 @@ section video,
 
   function buildYears(){
     var o='<option value="">Year</option>';
-    for(var y=2026;y>=1990;y--)
-      o+='<option value="'+y+'">'+y+'</option>';
+    for(var y=2026;y>=1990;y--) o+='<option value="'+y+'">'+y+'</option>';
     return o;
   }
 
   function buildMakes(){
     return '<option value="">Make</option>'+
-      MAKES.map(function(m){
-        return '<option value="'+m+'">'+m+'</option>';
-      }).join('');
+      MAKES.map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('');
   }
 
   function closeBtn(){
@@ -876,24 +284,32 @@ section video,
     return btn;
   }
 
-  /* ══ INIT GUARD ══ */
-  var ran=false;
-  function init(){
-    if(ran||!D.body||D.getElementById('oc-nb'))return;
-    ran=true;
+  function hidePanel(){
+    var p=D.getElementById('oc-spec-panel');
+    if(p)p.remove();
+  }
 
-    /* 1. Notice Bar */
+  function shake(el){
+    var pos=[7,-7,5,-5,3,-3,0],i=0;
+    var t=setInterval(function(){
+      el.style.transform='translateX('+(pos[i]||0)+'px)';
+      if(++i>=pos.length){clearInterval(t);el.style.transform='';}
+    },55);
+  }
+
+  function init(){
+    if(booted || !D.body || D.getElementById('oc-hdr')) return false;
+    booted=true;
+
     var nb=D.createElement('div');
     nb.id='oc-nb';
     nb.innerHTML='&#128295; Need help choosing the right oil? <a href="https://www.oilchoices.com/contact">Ask our experts &#8594;</a>';
     D.body.insertBefore(nb,D.body.firstChild);
 
-    /* 2. Progress Bar */
     var pg=D.createElement('div');
     pg.id='oc-prog';
     D.documentElement.appendChild(pg);
 
-    /* 3. Back To Top */
     var btt=D.createElement('button');
     btt.id='oc-btt';
     btt.type='button';
@@ -901,7 +317,6 @@ section video,
     btt.innerHTML='<svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>';
     D.documentElement.appendChild(btt);
 
-    /* 4. Header */
     var hdr=D.createElement('div');
     hdr.id='oc-hdr';
     hdr.innerHTML=
@@ -977,38 +392,38 @@ section video,
 
     nb.insertAdjacentElement('afterend',hdr);
 
-    /* 5. Mobile toggle */
-    var nw=D.getElementById('ocNW'),
-        r1=D.getElementById('ocR1'),
-        tog=D.getElementById('ocTog');
+    var nw=D.getElementById('ocNW');
+    var r1=D.getElementById('ocR1');
+    var tog=D.getElementById('ocTog');
+
     tog.addEventListener('click',function(){
-      var o=nw.classList.toggle('open');
-      r1.classList.toggle('mopen',o);
-      this.setAttribute('aria-expanded',String(o));
-      this.innerHTML=o?'&#10005;':'&#9776;';
+      var open=nw.classList.toggle('open');
+      r1.classList.toggle('mopen',open);
+      this.setAttribute('aria-expanded',String(open));
+      this.innerHTML=open?'&#10005;':'&#9776;';
     });
 
-    /* 6. Dropdowns */
     var dds=hdr.querySelectorAll('.oc-dd');
     dds.forEach(function(dd){
-      dd.querySelector('.oc-dtog').addEventListener('click',function(e){
+      var btn=dd.querySelector('.oc-dtog');
+      btn.addEventListener('click',function(e){
         e.preventDefault();
         e.stopPropagation();
         var was=dd.classList.contains('open');
         dds.forEach(function(d){
           d.classList.remove('open');
-          d.querySelector('.oc-dtog').setAttribute('aria-expanded','false');
-          d.querySelector('.oc-dtog').classList.remove('active');
+          var b=d.querySelector('.oc-dtog');
+          b.setAttribute('aria-expanded','false');
+          b.classList.remove('active');
         });
         if(!was){
           dd.classList.add('open');
-          this.setAttribute('aria-expanded','true');
-          this.classList.add('active');
+          btn.setAttribute('aria-expanded','true');
+          btn.classList.add('active');
         }
       });
     });
 
-    /* 7. Outside click */
     D.addEventListener('click',function(e){
       dds.forEach(function(dd){
         if(!dd.contains(e.target)){
@@ -1018,8 +433,7 @@ section video,
           b.classList.remove('active');
         }
       });
-      if(W.innerWidth<=960&&nw.classList.contains('open')&&
-         !nw.contains(e.target)&&!tog.contains(e.target)){
+      if(W.innerWidth<=960 && nw.classList.contains('open') && !nw.contains(e.target) && !tog.contains(e.target)){
         nw.classList.remove('open');
         r1.classList.remove('mopen');
         tog.setAttribute('aria-expanded','false');
@@ -1027,51 +441,40 @@ section video,
       }
     });
 
-    /* 8. Search */
-    var si=D.getElementById('ocSI'),sb=D.getElementById('ocSB');
+    var si=D.getElementById('ocSI');
+    var sb=D.getElementById('ocSB');
     function doSearch(){
       var q=(si.value||'').trim();
-      if(!q)return;
+      if(!q) return;
       W.location.href='https://www.google.com/search?q='+encodeURIComponent(q+' site:oilchoices.com');
     }
     sb.addEventListener('click',doSearch);
-    si.addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
+    si.addEventListener('keydown',function(e){
+      if(e.key==='Enter') doSearch();
+    });
 
-    /* 9. YMM */
-    var yY=D.getElementById('yY'),
-        yM=D.getElementById('yM'),
-        yMo=D.getElementById('yMo'),
-        yBtn=D.getElementById('yBtn');
+    var yY=D.getElementById('yY');
+    var yM=D.getElementById('yM');
+    var yMo=D.getElementById('yMo');
+    var yBtn=D.getElementById('yBtn');
 
     yM.addEventListener('change',function(){
       var list=MODELS[this.value]||[];
       yMo.innerHTML='<option value="">Model</option>'+
-        list.map(function(v){return '<option value="'+v+'">'+v+'</option>';}).join('');
+        list.map(function(v){ return '<option value="'+v+'">'+v+'</option>'; }).join('');
       yMo.disabled=list.length===0;
       hidePanel();
     });
     yY.addEventListener('change',hidePanel);
     yMo.addEventListener('change',hidePanel);
 
-    yBtn.addEventListener('click',function(){
-      var yr=yY.value,mk=yM.value,mo=yMo.value;
-      if(!yr||!mk){shake(yBtn);showError('Please select at least Year and Make.');return;}
-      var specs=(DB[mk]&&DB[mk][mo])||getFallbackSpecs(mk,mo);
-      if(mo&&specs){showResult(yr,mk,mo,specs);return;}
-      if(mo){showMissing(yr,mk,mo);return;}
-      var slug=[yr,mk,mo].filter(Boolean).join('-')
-        .toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-      W.location.href='https://www.oilchoices.com/vehicle-oil-capacity'+(slug?'/'+slug:'');
-    });
-
-    /* Panel helpers */
     function getPanel(){
       var p=D.getElementById('oc-spec-panel');
       if(!p){
         p=D.createElement('div');
         p.id='oc-spec-panel';
         var ymm=D.querySelector('.oc-ymm');
-        if(ymm)ymm.insertAdjacentElement('afterend',p);
+        if(ymm) ymm.insertAdjacentElement('afterend',p);
         else hdr.appendChild(p);
       }
       return p;
@@ -1106,8 +509,8 @@ section video,
 
       var lnk=D.createElement('a');
       lnk.className='oc-sp-link';
-      lnk.href='https://www.oilchoices.com/car-oil-capacity';
-      lnk.innerHTML=(s.note?'EV Care Guide &#8599;':'Full Guide &#8599;');
+      lnk.href=s.note ? 'https://www.oilchoices.com/about' : 'https://www.oilchoices.com/car-oil-capacity';
+      lnk.innerHTML=s.note ? 'EV Care Guide &#8599;' : 'Full Guide &#8599;';
       wrap.appendChild(lnk);
 
       wrap.appendChild(closeBtn());
@@ -1147,82 +550,91 @@ section video,
       p.appendChild(wrap);
     }
 
-    function hidePanel(){
-      var p=D.getElementById('oc-spec-panel');
-      if(p)p.remove();
-    }
+    yBtn.addEventListener('click',function(){
+      var yr=yY.value, mk=yM.value, mo=yMo.value;
+      if(!yr || !mk){
+        shake(yBtn);
+        showError('Please select at least Year and Make.');
+        return;
+      }
+      var specs=(DB[mk]&&DB[mk][mo]) || getFallbackSpecs(mk,mo);
+      if(mo && specs){ showResult(yr,mk,mo,specs); return; }
+      if(mo){ showMissing(yr,mk,mo); return; }
+      var slug=[yr,mk,mo].filter(Boolean).join('-')
+        .toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+      W.location.href='https://www.oilchoices.com/vehicle-oil-capacity'+(slug?'/'+slug:'');
+    });
 
-    function shake(el){
-      var pos=[7,-7,5,-5,3,-3,0],i=0;
-      var t=setInterval(function(){
-        el.style.transform='translateX('+(pos[i]||0)+'px)';
-        if(++i>=pos.length){clearInterval(t);el.style.transform='';}
-      },55);
-    }
-
-    /* 10. Active nav */
     var path=(W.location.pathname||'/').replace(/\/+$/,'')||'/';
     hdr.querySelectorAll('.oc-lnk[data-m]').forEach(function(l){
       var m=l.getAttribute('data-m');
-      l.classList.toggle('active',m==='/'?path==='/':path.indexOf(m)===0);
+      l.classList.toggle('active', m==='/' ? path==='/' : path.indexOf(m)===0);
     });
 
-    /* 11. BTT */
-    btt.addEventListener('click',function(){W.scrollTo({top:0,behavior:'smooth'});});
+    btt.addEventListener('click',function(){
+      W.scrollTo({top:0,behavior:'smooth'});
+    });
 
-    /* 12. Scroll */
-    var tick=false;
+    var ticking=false;
+
     function syncNoticeOffset(){
+      if(!nb || !D.documentElement) return;
       var wasCompact=nb.classList.contains('compact');
       nb.classList.remove('compact');
       nb.style.minHeight='';
-      var stable=Math.max(40,Math.round(nb.getBoundingClientRect().height));
+      var stable=Math.max(40, Math.round(nb.getBoundingClientRect().height||0));
       nb.style.minHeight=stable+'px';
-      if(wasCompact)nb.classList.add('compact');
-      D.documentElement.style.setProperty('--oc-nb-h',stable+'px');
+      if(wasCompact) nb.classList.add('compact');
+      D.documentElement.style.setProperty('--oc-nb-h', stable+'px');
     }
+
     function onScroll(){
       var st=W.scrollY||0;
       var dh=D.documentElement.scrollHeight-W.innerHeight;
-      pg.style.width=(dh>0?Math.min((st/dh)*100,100):0)+'%';
-      btt.classList.toggle('show',st>350);
-      hdr.classList.toggle('scrolled',st>30);
-      nb.classList.toggle('compact',st>30);
-      tick=false;
+      pg.style.width=(dh>0 ? Math.min((st/dh)*100,100) : 0)+'%';
+      btt.classList.toggle('show', st>350);
+      hdr.classList.toggle('scrolled', st>30);
+      nb.classList.toggle('compact', st>30);
+      ticking=false;
     }
+
     W.addEventListener('scroll',function(){
-      if(!tick){W.requestAnimationFrame(onScroll);tick=true;}
+      if(!ticking){
+        W.requestAnimationFrame(onScroll);
+        ticking=true;
+      }
     },{passive:true});
+
     W.addEventListener('resize',function(){
       syncNoticeOffset();
-      if(!tick){W.requestAnimationFrame(onScroll);tick=true;}
+      if(!ticking){
+        W.requestAnimationFrame(onScroll);
+        ticking=true;
+      }
     });
+
     syncNoticeOffset();
     onScroll();
 
-    /* 13. Hide native Hostinger header */
     setTimeout(function(){
       var sels=['header','[role="banner"]','.site-header','.header','.navbar','.topbar'];
       var seen=[];
       sels.forEach(function(sel){
         try{
           D.querySelectorAll(sel).forEach(function(el){
-            if(seen.indexOf(el)>-1)return;
+            if(seen.indexOf(el)>-1) return;
             seen.push(el);
-            if(el.id==='oc-hdr'||el.id==='oc-nb'||
-               el.id==='oc-prog'||el.id==='oc-btt'||
-               el.id==='oc-spec-panel')return;
-            if(el.closest&&(el.closest('#oc-hdr')||el.closest('#oc-nb')))return;
+            if(el.id==='oc-hdr' || el.id==='oc-nb' || el.id==='oc-prog' || el.id==='oc-btt' || el.id==='oc-spec-panel') return;
+            if(el.closest && (el.closest('#oc-hdr') || el.closest('#oc-nb'))) return;
+
             try{
               var r=el.getBoundingClientRect();
               var cs=W.getComputedStyle(el);
-              var near=r.top<160||cs.position==='fixed'||cs.position==='sticky';
+              var near=r.top<160 || cs.position==='fixed' || cs.position==='sticky';
               var wide=r.width>W.innerWidth*0.55;
-              var goodH=r.height>=35&&r.height<=290;
-              var isH=/header|banner|navbar|topbar/
-                .test(((el.tagName||'')+' '+(el.className||'')).toLowerCase())
-                ||el.tagName.toLowerCase()==='header';
-              if(isH&&near&&wide&&goodH){
+              var goodH=r.height>=35 && r.height<=290;
+              var isH=/header|banner|navbar|topbar/.test(((el.tagName||'')+' '+(el.className||'')).toLowerCase()) || (el.tagName||'').toLowerCase()==='header';
+              if(isH && near && wide && goodH){
                 el.classList.add('oc-kill');
                 el.setAttribute('aria-hidden','true');
               }
@@ -1230,14 +642,24 @@ section video,
           });
         }catch(ex){}
       });
-    },120);
+    },600);
+
+    return true;
   }
 
-  /* Safe boot */
+  function boot(){
+    if(init()) return;
+    if(booted) return;
+    bootTries++;
+    if(bootTries<BOOT_MAX){
+      W.setTimeout(boot,120);
+    }
+  }
+
   if(D.readyState==='loading'){
-    D.addEventListener('DOMContentLoaded',init);
+    D.addEventListener('DOMContentLoaded', boot, {once:true});
   } else {
-    init();
+    boot();
   }
-
+  W.addEventListener('load', boot, {once:true});
 })();
