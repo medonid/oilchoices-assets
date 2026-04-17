@@ -155,21 +155,26 @@ img, video { height: auto; display: block; }
 }
 
 .oc-badge {
-  width: 40px; height: 40px;
+  width: 48px; height: 48px;
   border-radius: 10px;
-  background: var(--oc-blue);
+  background: #fff;
+  border: 1px solid var(--oc-border);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
 .oc-badge img {
-  width: 32px !important;
-  height: 32px !important;
+  width: 44px !important;
+  height: 44px !important;
   object-fit: contain;
 }
+
+#oc-hdr.scrolled .oc-badge { width: 40px; height: 40px; }
+#oc-hdr.scrolled .oc-badge img { width: 36px !important; height: 36px !important; }
 
 .oc-btext {
   display: flex;
@@ -225,8 +230,8 @@ img, video { height: auto; display: block; }
 .oc-lnk, .oc-dtog {
   color: var(--oc-body);
   font-weight: 600;
-  font-size: 12.5px;
-  padding: 6px 10px;
+  font-size: 12px;
+  padding: 6px 7px;
   border-radius: 6px;
   background: transparent;
   border: none;
@@ -329,9 +334,10 @@ img, video { height: auto; display: block; }
 /* ── Search ── */
 .oc-srch {
   position: relative;
-  width: 210px;
+  width: 180px;
+  min-width: 140px;
   flex-shrink: 0;
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 .oc-srch input {
@@ -713,9 +719,10 @@ img, video { height: auto; display: block; }
     border-radius: 8px;
   }
 
-  .oc-ymm { padding: 8px 16px; max-height: 80px; }
-  .oc-ymm-in select { max-width: none; flex: 1 1 40%; }
-  .oc-ymm-btn { width: 100%; }
+  .oc-ymm { padding: 8px 16px; max-height: 120px; }
+  .oc-ymm-in { flex-wrap: wrap; gap: 6px; }
+  .oc-ymm-in select { max-width: none; flex: 1 1 30%; min-width: 80px; }
+  .oc-ymm-btn { width: 100%; margin-top: 2px; }
   #oc-spec-panel { padding: 8px 16px; }
 }
 
@@ -727,7 +734,7 @@ img, video { height: auto; display: block; }
   .oc-btitle { font-size: 15px !important; }
   .oc-bsub { display: none; }
   .oc-r1 { padding: 0 12px; height: 52px; }
-  .oc-ymm { padding: 7px 12px; }
+  .oc-ymm { padding: 7px 12px; max-height: 130px; }
   #oc-spec-panel { padding: 7px 12px; }
   .oc-sp-pill { padding: 3px 8px; }
   .oc-sp-pill-val { font-size: 12px; }
