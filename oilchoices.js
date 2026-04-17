@@ -438,8 +438,8 @@
       '<div class="oc-r1">' +
         '<a class="oc-brand" href="https://www.oilchoices.com/" aria-label="OilChoices home">' +
           '<span class="oc-badge">' +
-            '<img src="https://assets.zyrosite.com/H1TztxDu8joXrzU2/logo_falg_us-removebg-preview2-cK8YmexhrcooOrxd.webp"' +
-                 ' alt="OilChoices" width="32" height="32" loading="eager" fetchpriority="high">' +
+            '<img src="https://assets.zyrosite.com/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp"' +
+                 ' alt="OilChoices logo" width="44" height="44" loading="eager" fetchpriority="high">' +
           '</span>' +
           '<span class="oc-btext">' +
             '<span class="oc-btitle">OilChoices</span>' +
@@ -510,7 +510,7 @@
           '<label class="oc-sr-only" for="yY">Year</label>' +
           '<select id="yY">' + buildYears() + '</select>' +
           '<label class="oc-sr-only" for="yM">Make</label>' +
-          '<select id="yM">' + buildMakes() + '</select>' +
+          '<select id="yM" disabled><option value="">Make</option></select>' +
           '<label class="oc-sr-only" for="yMo">Model</label>' +
           '<select id="yMo" disabled><option value="">Model</option></select>' +
           '<button class="oc-ymm-btn" id="yBtn" type="button">Find Oil Spec \u2192</button>' +
@@ -598,42 +598,120 @@
       if (e.key === 'Enter') doSearch();
     });
 
-    /* ── YMM selects ── */
-    var yY  = D.getElementById('yY');
-    var yM  = D.getElementById('yM');
-    var yMo = D.getElementById('yMo');
+    /* ── YMM selects — strict sequential ── */
+    var yY   = D.getElementById('yY');
+    var yM   = D.getElementById('yM');
+    var yMo  = D.getElementById('yMo');
     var yBtn = D.getElementById('yBtn');
 
+    /* Start locked */
+    yM.disabled  = true;
+    yMo.disabled = true;
+
+    function resetSelect(sel, placeholder) {
+      sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      sel.disabled = true;
+    }
+
+    function showGuide(msg, type) {
+      var p = getPanel();
+      p.className = type === 'info' ? '' : 'oc-sp-err';
+      p.innerHTML = '';
+      var wrap = D.createElement('div');
+      var sp = D.createElement('span');
+      sp.style.cssText = 'font-size:13px;font-weight:600;color:' + (type === 'info' ? 'var(--oc-blue)' : 'var(--oc-red)');
+      sp.textContent = msg;
+      wrap.appendChild(sp);
+      wrap.appendChild(closeBtn());
+      p.appendChild(wrap);
+    }
+
+    /* Step 1 — Year selected → unlock Make */
+    yY.addEventListener('change', function () {
+      hidePanel();
+      if (!this.value) {
+        resetSelect(yM, 'Make');
+        resetSelect(yMo, 'Model');
+        return;
+      }
+      yM.innerHTML = buildMakes();
+      yM.disabled = false;
+      yM.focus();
+      resetSelect(yMo, 'Model');
+      showGuide('✓ Year selected — now choose your Make', 'info');
+    });
+
+    /* Step 2 — Make selected → unlock Model */
     yM.addEventListener('change', function () {
+      hidePanel();
+      if (!this.value) {
+        resetSelect(yMo, 'Model');
+        return;
+      }
       var list = MODELS[this.value] || [];
       yMo.innerHTML = '<option value="">Model</option>' +
         list.map(function (v) { return '<option value="' + v + '">' + v + '</option>'; }).join('');
-      yMo.disabled = list.length === 0;
-      hidePanel();
+      yMo.disabled = false;
+      yMo.focus();
+      showGuide('✓ Make selected — now choose your Model', 'info');
     });
 
-    yY.addEventListener('change', hidePanel);
-    yMo.addEventListener('change', hidePanel);
+    /* Step 3 — Model selected → ready */
+    yMo.addEventListener('change', function () {
+      hidePanel();
+      if (this.value) {
+        showGuide('✓ Ready — press Find Oil Spec', 'info');
+      }
+    });
 
+    /* Click on Make before Year */
+    yM.addEventListener('mousedown', function (e) {
+      if (this.disabled) {
+        e.preventDefault();
+        shake(yY);
+        showGuide('⚠ Please select the Year first', 'error');
+      }
+    });
+
+    /* Click on Model before Make */
+    yMo.addEventListener('mousedown', function (e) {
+      if (this.disabled) {
+        e.preventDefault();
+        if (!yY.value) {
+          shake(yY);
+          showGuide('⚠ Please select the Year first', 'error');
+        } else {
+          shake(yM);
+          showGuide('⚠ Please select the Make first', 'error');
+        }
+      }
+    });
+
+    /* Find Oil Spec button */
     yBtn.addEventListener('click', function () {
       var yr = yY.value, mk = yM.value, mo = yMo.value;
 
-      if (!yr || !mk) {
-        shake(yBtn);
-        showError('Please select at least Year and Make.');
+      if (!yr) {
+        shake(yY); shake(yBtn);
+        showGuide('⚠ Please select a Year to get started', 'error');
+        return;
+      }
+      if (!mk) {
+        shake(yM); shake(yBtn);
+        showGuide('⚠ Please select your vehicle Make', 'error');
+        return;
+      }
+      if (!mo) {
+        shake(yMo); shake(yBtn);
+        showGuide('⚠ Please select your vehicle Model', 'error');
         return;
       }
 
       var specs = (DB[mk] && DB[mk][mo]) || getFallback(mk, mo);
 
-      if (mo && specs) { showResult(yr, mk, mo, specs); return; }
-      if (mo)          { showMissing(yr, mk, mo); return; }
+      if (specs) { showResult(yr, mk, mo, specs); return; }
 
-      /* No model selected — go to lookup page */
-      var slug = [yr, mk]
-        .filter(Boolean).join('-')
-        .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      W.location.href = 'https://www.oilchoices.com/vehicle-oil-capacity' + (slug ? '/' + slug : '');
+      showMissing(yr, mk, mo);
     });
 
     /* ── Active nav link ── */
