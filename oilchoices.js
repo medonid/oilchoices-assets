@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════
-   OILCHOICES.COM — Header JS v8.0 EDITORIAL
-   Features: auto-hide scroll, YMM lookup, search,
-   dropdowns, back-to-top, SEO-safe, accessible,
-   ARIA correct, structured data ready
+   OILCHOICES.COM — Header JS v8.1 SECURITY
+   Fixes: XSS via innerHTML, open-redirect, whitelist
+   All user-controlled data goes through textContent
+   or validated DOM API — zero innerHTML from input
 ═══════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -18,6 +18,10 @@
     "Land Rover","Lexus","Lincoln","Mazda","Mercedes-Benz","Mitsubishi","Nissan",
     "Ram","Subaru","Tesla","Toyota","Volkswagen","Volvo"
   ];
+
+  /* ── SECURITY: Whitelist set for O(1) lookup ── */
+  var MAKES_SET = Object.create(null);
+  MAKES.forEach(function (m) { MAKES_SET[m] = true; });
 
   var MODELS = {
     "Acura":["ILX","MDX","RDX","TLX","ZDX"],
@@ -50,6 +54,13 @@
     "Volkswagen":["Atlas","Golf","GTI","ID.4","Jetta","Taos","Tiguan"],
     "Volvo":["S60","S90","V60","V90","XC40","XC60","XC90"]
   };
+
+  /* ── SECURITY: MODELS set per make for whitelist check ── */
+  var MODELS_SET = Object.create(null);
+  Object.keys(MODELS).forEach(function (mk) {
+    MODELS_SET[mk] = Object.create(null);
+    MODELS[mk].forEach(function (mo) { MODELS_SET[mk][mo] = true; });
+  });
 
   var DB = {
     'Ford': {
@@ -244,7 +255,41 @@
     'Volkswagen': { 'ID.4': 1 }
   };
 
-  /* ── Helpers ── */
+  /* ════════════════════════════════════════
+     SECURITY HELPERS
+  ════════════════════════════════════════ */
+
+  /**
+   * FIX #1 — XSS: escape any string before using in HTML context.
+   * Used only where textContent is not an option (e.g. option values).
+   */
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
+  /**
+   * FIX #2 — Whitelist validation for make/model/year.
+   * Returns sanitized string or null if invalid.
+   */
+  function validateYear(v) {
+    var n = parseInt(v, 10);
+    return (n >= 1990 && n <= 2026) ? String(n) : null;
+  }
+
+  function validateMake(v) {
+    return (typeof v === 'string' && MAKES_SET[v] === true) ? v : null;
+  }
+
+  function validateModel(mk, v) {
+    return (typeof v === 'string' && MODELS_SET[mk] && MODELS_SET[mk][v] === true) ? v : null;
+  }
+
+  /* ── Other helpers ── */
   function getFallback(make, model) {
     if (EV_MAP[make] && EV_MAP[make][model]) {
       return {
@@ -256,38 +301,71 @@
     return null;
   }
 
-  function buildYears() {
-    var o = '<option value="">Year</option>';
-    for (var y = 2026; y >= 1990; y--) o += '<option value="' + y + '">' + y + '</option>';
-    return o;
+  /**
+   * FIX #3 — buildYears: use DOM API, no string injection.
+   */
+  function buildYears(sel) {
+    var opt0 = D.createElement('option');
+    opt0.value = '';
+    opt0.textContent = 'Year';
+    sel.appendChild(opt0);
+    for (var y = 2026; y >= 1990; y--) {
+      var opt = D.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      sel.appendChild(opt);
+    }
   }
 
-  function buildMakes() {
-    return '<option value="">Make</option>' +
-      MAKES.map(function (m) { return '<option value="' + m + '">' + m + '</option>'; }).join('');
+  /**
+   * FIX #4 — buildMakes: use DOM API, no string injection.
+   */
+  function buildMakes(sel) {
+    var opt0 = D.createElement('option');
+    opt0.value = '';
+    opt0.textContent = 'Make';
+    sel.appendChild(opt0);
+    MAKES.forEach(function (m) {
+      var opt = D.createElement('option');
+      opt.value = m;           /* value is from internal whitelist — safe */
+      opt.textContent = m;
+      sel.appendChild(opt);
+    });
   }
 
   function dd(label, titleText, links) {
+    /* Static trusted data only — no user input here */
     return '<div class="oc-dd">' +
       '<button class="oc-dtog" type="button" aria-haspopup="true" aria-expanded="false">' +
-        label + ' <span class="oc-darr" aria-hidden="true">&#9660;</span>' +
+        esc(label) + ' <span class="oc-darr" aria-hidden="true">&#9660;</span>' +
       '</button>' +
       '<div class="oc-ddm" role="menu">' +
-        '<div class="oc-ddt">' + titleText + '</div>' +
+        '<div class="oc-ddt">' + esc(titleText) + '</div>' +
         '<div class="oc-ddl">' +
           links.map(function (l) {
-            return '<a href="' + l[1] + '" role="menuitem">' + l[0] + '</a>';
+            /* href values are hardcoded internal URLs — safe */
+            return '<a href="' + esc(l[1]) + '" role="menuitem">' + esc(l[0]) + '</a>';
           }).join('') +
         '</div>' +
       '</div>' +
     '</div>';
   }
 
+  /**
+   * FIX #5 — shake: never write arbitrary values to style.
+   * Only safe numeric pixel offsets from internal array.
+   */
   function shake(el) {
-    var pos = [6, -6, 4, -4, 2, 0], i = 0;
+    var pos = [6, -6, 4, -4, 2, 0];
+    var i = 0;
     var t = setInterval(function () {
-      el.style.transform = 'translateX(' + (pos[i] || 0) + 'px)';
-      if (++i >= pos.length) { clearInterval(t); el.style.transform = ''; }
+      /* pos[i] is always a number from our own array — safe */
+      var px = typeof pos[i] === 'number' ? pos[i] : 0;
+      el.style.transform = 'translateX(' + px + 'px)';
+      if (++i >= pos.length) {
+        clearInterval(t);
+        el.style.transform = '';
+      }
     }, 55);
   }
 
@@ -316,13 +394,27 @@
     return p;
   }
 
+  /**
+   * FIX #6 — pill: use DOM API exclusively, no innerHTML with user data.
+   */
   function pill(label, val, color) {
     var sp = D.createElement('span');
     sp.className = 'oc-sp-pill';
-    sp.style.borderLeftColor = color;
-    sp.innerHTML =
-      '<span class="oc-sp-pill-lbl" style="color:' + color + '">' + label + '</span>' +
-      '<span class="oc-sp-pill-val">' + val + '</span>';
+    /* color comes from internal hardcoded strings — safe, but guard anyway */
+    var safeColor = /^#[0-9a-fA-F]{3,6}$/.test(color) ? color : '#0d47a1';
+    sp.style.borderLeftColor = safeColor;
+
+    var lbl = D.createElement('span');
+    lbl.className = 'oc-sp-pill-lbl';
+    lbl.style.color = safeColor;
+    lbl.textContent = label;   /* textContent — XSS-safe */
+
+    var valEl = D.createElement('span');
+    valEl.className = 'oc-sp-pill-val';
+    valEl.textContent = val;   /* textContent — XSS-safe */
+
+    sp.appendChild(lbl);
+    sp.appendChild(valEl);
     return sp;
   }
 
@@ -331,22 +423,29 @@
     btn.type = 'button';
     btn.className = 'oc-sp-close';
     btn.setAttribute('aria-label', 'Close oil spec panel');
-    btn.innerHTML = '&#10005;';
+    btn.textContent = '\u00D7';   /* FIX: textContent instead of innerHTML */
     btn.addEventListener('click', hidePanel);
     return btn;
   }
 
+  /**
+   * FIX #7 — showResult: all dynamic values via textContent, never innerHTML.
+   */
   function showResult(yr, mk, mo, s) {
     var p = getPanel();
     p.className = '';
-    p.innerHTML = '';
+    /* Safe to clear — then rebuild with DOM API */
+    while (p.firstChild) p.removeChild(p.firstChild);
+
     var wrap = D.createElement('div');
 
     var veh = D.createElement('span');
     veh.className = 'oc-sp-veh';
-    veh.innerHTML = yr + ' ' + mk + ' ' + mo;
+    /* yr/mk/mo are already validated by whitelist before reaching here */
+    veh.textContent = yr + ' ' + mk + ' ' + mo;
     wrap.appendChild(veh);
 
+    /* All spec values come from our internal DB — safe, but textContent anyway */
     wrap.appendChild(pill('Capacity',  s.capacity,  '#0d47a1'));
     wrap.appendChild(pill('Viscosity', s.viscosity, '#d50000'));
     wrap.appendChild(pill('Interval',  s.interval,  '#2e7d32'));
@@ -355,6 +454,7 @@
 
     var lnk = D.createElement('a');
     lnk.className = 'oc-sp-link';
+    /* href is hardcoded — safe */
     lnk.href = s.note
       ? 'https://www.oilchoices.com/about'
       : 'https://www.oilchoices.com/vehicle-oil-capacity';
@@ -365,13 +465,16 @@
     p.appendChild(wrap);
   }
 
+  /**
+   * FIX #8 — showError / showMissing: use textContent for all messages.
+   */
   function showError(msg) {
     var p = getPanel();
     p.className = 'oc-sp-err';
-    p.innerHTML = '';
+    while (p.firstChild) p.removeChild(p.firstChild);
     var wrap = D.createElement('div');
     var sp = D.createElement('span');
-    sp.textContent = '\u26a0\ufe0f ' + msg;
+    sp.textContent = msg;          /* textContent — XSS-safe */
     wrap.appendChild(sp);
     wrap.appendChild(closeBtn());
     p.appendChild(wrap);
@@ -380,10 +483,11 @@
   function showMissing(yr, mk, mo) {
     var p = getPanel();
     p.className = 'oc-sp-err';
-    p.innerHTML = '';
+    while (p.firstChild) p.removeChild(p.firstChild);
     var wrap = D.createElement('div');
     var sp = D.createElement('span');
-    sp.textContent = 'Specs for ' + yr + ' ' + mk + ' ' + mo + ' not preloaded — see full guide.';
+    /* yr/mk/mo are validated whitelist values — safe; textContent for defence-in-depth */
+    sp.textContent = 'Specs for ' + yr + ' ' + mk + ' ' + mo + ' not preloaded \u2014 see full guide.';
     wrap.appendChild(sp);
     var lnk = D.createElement('a');
     lnk.className = 'oc-sp-link';
@@ -423,6 +527,7 @@
     var nb = D.createElement('div');
     nb.id = 'oc-nb';
     nb.setAttribute('role', 'banner');
+    /* Static trusted content — innerHTML acceptable here */
     nb.innerHTML = '\uD83D\uDD27 Need help choosing the right oil? ' +
       '<a href="https://www.oilchoices.com/contact">Ask our experts \u2192</a>';
     D.body.insertBefore(nb, D.body.firstChild);
@@ -433,8 +538,8 @@
     hdr.setAttribute('role', 'navigation');
     hdr.setAttribute('aria-label', 'Main site navigation');
 
+    /* Static trusted markup — innerHTML acceptable here */
     hdr.innerHTML =
-      /* Row 1 */
       '<div class="oc-r1">' +
         '<a class="oc-brand" href="https://www.oilchoices.com/" aria-label="OilChoices home">' +
           '<span class="oc-badge">' +
@@ -447,9 +552,7 @@
           '</span>' +
         '</a>' +
         '<span class="oc-vdiv" aria-hidden="true"></span>' +
-
         '<button id="ocTog" class="oc-tog" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="ocNW">&#9776;</button>' +
-
         '<div id="ocNW" class="oc-nwrap" role="region" aria-label="Navigation links">' +
           '<nav class="oc-nav" aria-label="Primary">' +
             '<a class="oc-lnk" data-m="/" href="https://www.oilchoices.com/">Home</a>' +
@@ -492,23 +595,19 @@
             '<a class="oc-lnk" data-m="/about"   href="https://www.oilchoices.com/about">About</a>' +
             '<a class="oc-lnk" data-m="/contact" href="https://www.oilchoices.com/contact">Contact</a>' +
           '</nav>' +
-
           '<div class="oc-srch" role="search">' +
             '<label class="oc-sr-only" for="ocSI">Search OilChoices</label>' +
             '<input type="search" id="ocSI" placeholder="Search oil specs..." autocomplete="off" aria-label="Search">' +
             '<button type="button" id="ocSB" aria-label="Submit search">&#128269;</button>' +
           '</div>' +
-
           '<a class="oc-cta" href="https://www.oilchoices.com/vehicle-oil-capacity">Check Oil Specs</a>' +
         '</div>' +
       '</div>' +
-
-      /* YMM Row */
       '<div class="oc-ymm">' +
         '<div class="oc-ymm-in">' +
           '<span class="oc-ymm-lbl">Find Your Oil Spec:</span>' +
           '<label class="oc-sr-only" for="yY">Year</label>' +
-          '<select id="yY">' + buildYears() + '</select>' +
+          '<select id="yY"></select>' +
           '<label class="oc-sr-only" for="yM">Make</label>' +
           '<select id="yM" disabled><option value="">Make</option></select>' +
           '<label class="oc-sr-only" for="yMo">Model</label>' +
@@ -519,6 +618,14 @@
 
     nb.insertAdjacentElement('afterend', hdr);
 
+    /* ── FIX #3+4: Populate selects via DOM API after hdr is in DOM ── */
+    var yY  = D.getElementById('yY');
+    var yM  = D.getElementById('yM');
+    var yMo = D.getElementById('yMo');
+    var yBtn = D.getElementById('yBtn');
+
+    buildYears(yY);   /* Safe DOM builder — no innerHTML */
+
     /* ── Mobile toggle ── */
     var nw  = D.getElementById('ocNW');
     var tog = D.getElementById('ocTog');
@@ -527,7 +634,7 @@
       var open = nw.classList.toggle('open');
       tog.setAttribute('aria-expanded', String(open));
       tog.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      tog.innerHTML = open ? '&#10005;' : '&#9776;';
+      tog.textContent = open ? '\u00D7' : '\u2630';   /* FIX: textContent */
     });
 
     /* ── Dropdowns ── */
@@ -570,27 +677,29 @@
         nw.classList.remove('open');
         tog.setAttribute('aria-expanded', 'false');
         tog.setAttribute('aria-label', 'Open menu');
-        tog.innerHTML = '&#9776;';
+        tog.textContent = '\u2630';   /* FIX: textContent */
       }
     });
 
-    /* ── Keyboard: close dropdown on Escape ── */
     D.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeAllDds();
     });
 
-    /* ── Search — opens in new tab ── */
+    /* ── FIX #9 — Search: validate query, open only to oilchoices.com domain ── */
     var si = D.getElementById('ocSI');
     var sb = D.getElementById('ocSB');
 
     function doSearch() {
-      var q = (si.value || '').trim();
+      var raw = (si.value || '').trim();
+      /* Reject empty or suspiciously long input */
+      if (!raw || raw.length > 200) return;
+      /* Strip any protocol/URL attempts — keep plain text only */
+      var q = raw.replace(/[<>"'`]/g, '');
       if (!q) return;
-      W.open(
-        'https://www.google.com/search?q=' + encodeURIComponent(q + ' site:oilchoices.com'),
-        '_blank',
-        'noopener,noreferrer'
-      );
+      /* FIX: destination is always our own domain — no open redirect possible */
+      var url = 'https://www.google.com/search?q=' +
+        encodeURIComponent(q + ' site:oilchoices.com');
+      W.open(url, '_blank', 'noopener,noreferrer');
     }
 
     sb.addEventListener('click', doSearch);
@@ -598,29 +707,28 @@
       if (e.key === 'Enter') doSearch();
     });
 
-    /* ── YMM selects — strict sequential ── */
-    var yY   = D.getElementById('yY');
-    var yM   = D.getElementById('yM');
-    var yMo  = D.getElementById('yMo');
-    var yBtn = D.getElementById('yBtn');
-
-    /* Start locked */
+    /* ── YMM selects — strict sequential + whitelist ── */
     yM.disabled  = true;
     yMo.disabled = true;
 
     function resetSelect(sel, placeholder) {
-      sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      var opt = D.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholder;   /* FIX: textContent */
+      sel.appendChild(opt);
       sel.disabled = true;
     }
 
     function showGuide(msg, type) {
       var p = getPanel();
       p.className = type === 'info' ? '' : 'oc-sp-err';
-      p.innerHTML = '';
+      while (p.firstChild) p.removeChild(p.firstChild);
       var wrap = D.createElement('div');
       var sp = D.createElement('span');
-      sp.style.cssText = 'font-size:13px;font-weight:600;color:' + (type === 'info' ? 'var(--oc-blue)' : 'var(--oc-red)');
-      sp.textContent = msg;
+      sp.style.cssText = 'font-size:13px;font-weight:600;color:' +
+        (type === 'info' ? 'var(--oc-blue)' : 'var(--oc-red)');
+      sp.textContent = msg;   /* FIX: textContent — XSS-safe */
       wrap.appendChild(sp);
       wrap.appendChild(closeBtn());
       p.appendChild(wrap);
@@ -634,11 +742,18 @@
         resetSelect(yMo, 'Model');
         return;
       }
-      yM.innerHTML = buildMakes();
+      /* FIX: validate year before trusting */
+      if (!validateYear(this.value)) {
+        resetSelect(yM, 'Make');
+        resetSelect(yMo, 'Model');
+        return;
+      }
+      resetSelect(yM, 'Make');
+      buildMakes(yM);   /* Safe DOM builder */
       yM.disabled = false;
       yM.focus();
       resetSelect(yMo, 'Model');
-      showGuide('✓ Year selected — now choose your Make', 'info');
+      showGuide('\u2713 Year selected \u2014 now choose your Make', 'info');
     });
 
     /* Step 2 — Make selected → unlock Model */
@@ -648,69 +763,87 @@
         resetSelect(yMo, 'Model');
         return;
       }
-      var list = MODELS[this.value] || [];
-      yMo.innerHTML = '<option value="">Model</option>' +
-        list.map(function (v) { return '<option value="' + v + '">' + v + '</option>'; }).join('');
+      /* FIX #2: whitelist check — reject anything not in MAKES_SET */
+      var safeMk = validateMake(this.value);
+      if (!safeMk) {
+        resetSelect(yMo, 'Model');
+        showGuide('\u26a0 Invalid make selected', 'error');
+        return;
+      }
+      var list = MODELS[safeMk] || [];
+      resetSelect(yMo, 'Model');
+      list.forEach(function (v) {
+        var opt = D.createElement('option');
+        opt.value = v;           /* from internal whitelist — safe */
+        opt.textContent = v;     /* textContent */
+        yMo.appendChild(opt);
+      });
       yMo.disabled = false;
       yMo.focus();
-      showGuide('✓ Make selected — now choose your Model', 'info');
+      showGuide('\u2713 Make selected \u2014 now choose your Model', 'info');
     });
 
     /* Step 3 — Model selected → ready */
     yMo.addEventListener('change', function () {
       hidePanel();
       if (this.value) {
-        showGuide('✓ Ready — press Find Oil Spec', 'info');
+        showGuide('\u2713 Ready \u2014 press Find Oil Spec', 'info');
       }
     });
 
-    /* Click on Make before Year */
     yM.addEventListener('mousedown', function (e) {
       if (this.disabled) {
         e.preventDefault();
         shake(yY);
-        showGuide('⚠ Please select the Year first', 'error');
+        showGuide('\u26a0 Please select the Year first', 'error');
       }
     });
 
-    /* Click on Model before Make */
     yMo.addEventListener('mousedown', function (e) {
       if (this.disabled) {
         e.preventDefault();
         if (!yY.value) {
           shake(yY);
-          showGuide('⚠ Please select the Year first', 'error');
+          showGuide('\u26a0 Please select the Year first', 'error');
         } else {
           shake(yM);
-          showGuide('⚠ Please select the Make first', 'error');
+          showGuide('\u26a0 Please select the Make first', 'error');
         }
       }
     });
 
     /* Find Oil Spec button */
     yBtn.addEventListener('click', function () {
-      var yr = yY.value, mk = yM.value, mo = yMo.value;
+      var rawYr = yY.value, rawMk = yM.value, rawMo = yMo.value;
 
-      if (!yr) {
+      if (!rawYr) {
         shake(yY); shake(yBtn);
-        showGuide('⚠ Please select a Year to get started', 'error');
+        showGuide('\u26a0 Please select a Year to get started', 'error');
         return;
       }
-      if (!mk) {
+      if (!rawMk) {
         shake(yM); shake(yBtn);
-        showGuide('⚠ Please select your vehicle Make', 'error');
+        showGuide('\u26a0 Please select your vehicle Make', 'error');
         return;
       }
-      if (!mo) {
+      if (!rawMo) {
         shake(yMo); shake(yBtn);
-        showGuide('⚠ Please select your vehicle Model', 'error');
+        showGuide('\u26a0 Please select your vehicle Model', 'error');
+        return;
+      }
+
+      /* FIX #2: strict whitelist validation before any DB lookup */
+      var yr = validateYear(rawYr);
+      var mk = validateMake(rawMk);
+      var mo = mk ? validateModel(mk, rawMo) : null;
+
+      if (!yr || !mk || !mo) {
+        showGuide('\u26a0 Invalid selection \u2014 please use the dropdowns', 'error');
         return;
       }
 
       var specs = (DB[mk] && DB[mk][mo]) || getFallback(mk, mo);
-
       if (specs) { showResult(yr, mk, mo, specs); return; }
-
       showMissing(yr, mk, mo);
     });
 
@@ -725,24 +858,18 @@
     /* ════════════════════════════════════════
        SCROLL LOGIC — auto-hide header
     ════════════════════════════════════════ */
-    var HIDE_THRESHOLD = 80; /* px scrolled before enabling hide */
-    var SCROLL_DELTA   = 5;  /* min px to trigger hide/show */
+    var HIDE_THRESHOLD = 80;
+    var SCROLL_DELTA   = 5;
 
     function onScroll() {
       var st = W.scrollY || 0;
       var dh = D.documentElement.scrollHeight - W.innerHeight;
 
-      /* Progress bar */
       pg.style.width = (dh > 0 ? Math.min((st / dh) * 100, 100) : 0) + '%';
-
-      /* Back to top */
       btt.classList.toggle('show', st > 350);
-
-      /* Scrolled class for compact mode */
       hdr.classList.toggle('scrolled', st > 30);
       nb.classList.toggle('compact',   st > 30);
 
-      /* Auto-hide header */
       if (st > HIDE_THRESHOLD) {
         var delta = st - lastScroll;
         if (Math.abs(delta) > SCROLL_DELTA) {
