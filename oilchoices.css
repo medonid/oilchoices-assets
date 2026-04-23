@@ -1,3 +1,4 @@
+css
 /* ═══════════════════════════════════════════════════
    OILCHOICES.COM — Header CSS v8.0 EDITORIAL
    github: medonid/oilchoices-assets
@@ -28,6 +29,7 @@ html {
   max-width: 100%;
   overflow-x: hidden !important;
 }
+
 *, *::before, *::after { box-sizing: inherit; }
 
 body {
@@ -63,6 +65,7 @@ img, video { height: auto; display: block; }
 .layout-wrapper, .page-wrapper, .site-wrapper {
   max-width: 100% !important;
   width: 100% !important;
+  overflow-x: hidden !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   margin-left: 0 !important;
@@ -142,13 +145,30 @@ img, video { height: auto; display: block; }
   transform: translateY(calc(-100% - var(--oc-nb-h)));
 }
 
+#oc-hdr,
+#oc-nb,
+.oc-r1,
+.oc-nwrap,
+.oc-nav,
+.oc-ymm,
+#oc-spec-panel {
+  max-width: 100% !important;
+}
+
+.oc-r1,
+.oc-nwrap,
+.oc-nav,
+.oc-brand,
+.oc-btext {
+  min-width: 0 !important;
+}
+
 /* ── Row 1: Brand + Nav ── */
 .oc-r1 {
   width: 100%;
   max-width: 1200px;
-  min-width: 0;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 28px 0 0;
   height: 62px;
   display: flex;
   align-items: center;
@@ -163,7 +183,7 @@ img, video { height: auto; display: block; }
   text-decoration: none;
   flex-shrink: 0;
   margin-right: 8px;
-  min-width: 0;
+  margin-left: 0;
 }
 
 .oc-badge {
@@ -192,7 +212,6 @@ img, video { height: auto; display: block; }
   display: flex;
   flex-direction: column;
   line-height: 1.1;
-  min-width: 0;
 }
 
 .oc-btitle {
@@ -229,7 +248,6 @@ img, video { height: auto; display: block; }
   align-items: center;
   gap: 4px;
   flex: 1 1 auto;
-  min-width: 0;
   justify-content: flex-end;
 }
 
@@ -238,7 +256,6 @@ img, video { height: auto; display: block; }
   display: flex;
   align-items: center;
   gap: 1px;
-  min-width: 0;
 }
 
 /* ── Nav links & dropdown toggles ── */
@@ -350,16 +367,16 @@ img, video { height: auto; display: block; }
 /* ── Search ── */
 .oc-srch {
   position: relative;
-  width: 180px;
+  width: 160px;
+  max-width: 160px;
   min-width: 0;
-  max-width: 180px;
+  flex: 0 1 160px;
   flex-shrink: 0;
   margin-left: 4px;
 }
 
 .oc-srch input {
   width: 100%;
-  min-width: 0;
   height: 36px;
   border: 1px solid var(--oc-border);
   border-radius: 6px;
@@ -444,7 +461,6 @@ img, video { height: auto; display: block; }
 ════════════════════════════════════════ */
 .oc-ymm {
   width: 100%;
-  max-width: 100%;
   background: var(--oc-bg);
   border-top: 1px solid var(--oc-border);
   padding: 8px 28px;
@@ -519,7 +535,6 @@ img, video { height: auto; display: block; }
 ════════════════════════════════════════ */
 #oc-spec-panel {
   width: 100%;
-  max-width: 100%;
   background: var(--oc-blue-light);
   border-top: 1px solid rgba(13,71,161,.15);
   padding: 10px 28px;
@@ -660,7 +675,7 @@ img, video { height: auto; display: block; }
 ════════════════════════════════════════ */
 @media (max-width: 1180px) {
   .oc-r1 {
-    padding: 0 18px;
+    padding: 0 18px 0 0;
     gap: 4px;
   }
 
@@ -670,8 +685,9 @@ img, video { height: auto; display: block; }
   }
 
   .oc-srch {
-    width: 150px;
-    max-width: 150px;
+    width: 145px;
+    max-width: 145px;
+    flex: 0 1 145px;
   }
 
   .oc-cta {
@@ -681,13 +697,13 @@ img, video { height: auto; display: block; }
 }
 
 /* ════════════════════════════════════════
-   RESPONSIVE — Tablet / Desktop-Mode Phone 1100px
+   RESPONSIVE — Tablet / Desktop Mode on Phones
 ════════════════════════════════════════ */
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
   .oc-tog { display: inline-flex !important; }
 
   .oc-r1 {
-    padding: 0 16px;
+    padding: 0 16px 0 0;
     height: 56px;
     justify-content: space-between;
   }
@@ -699,6 +715,9 @@ img, video { height: auto; display: block; }
     position: absolute;
     top: 100%;
     left: 0; right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
     background: var(--oc-white);
     border-top: 1px solid var(--oc-border);
     border-bottom: 2px solid var(--oc-blue);
@@ -750,9 +769,11 @@ img, video { height: auto; display: block; }
   }
 
   .oc-srch {
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     margin: 0;
+    flex: 1 1 auto !important;
   }
 
   .oc-srch input { width: 100%; }
@@ -779,7 +800,7 @@ img, video { height: auto; display: block; }
   #oc-nb { font-size: 11.5px; padding: 7px 12px; }
   .oc-btitle { font-size: 15px !important; }
   .oc-bsub { display: none; }
-  .oc-r1 { padding: 0 12px; height: 52px; }
+  .oc-r1 { padding: 0 12px 0 0; height: 52px; }
   .oc-ymm { padding: 7px 12px; max-height: 130px; }
   #oc-spec-panel { padding: 7px 12px; }
   .oc-sp-pill { padding: 3px 8px; }
@@ -819,3 +840,4 @@ img, video { height: auto; display: block; }
 @media print {
   #oc-nb, #oc-hdr, #oc-prog, #oc-btt { display: none !important; }
 }
+
