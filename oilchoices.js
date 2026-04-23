@@ -672,7 +672,7 @@
           b.classList.remove('active');
         }
       });
-      if (W.innerWidth <= 1280 && nw.classList.contains('open') &&
+      if (W.innerWidth <= 960 && nw.classList.contains('open') &&
           !nw.contains(e.target) && !tog.contains(e.target)) {
         nw.classList.remove('open');
         tog.setAttribute('aria-expanded', 'false');
