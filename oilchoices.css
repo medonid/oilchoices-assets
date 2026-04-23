@@ -773,3 +773,163 @@ img, video { height: auto; display: block; }
 @media print {
   #oc-nb, #oc-hdr, #oc-prog, #oc-btt { display: none !important; }
 }
+/* ===== SAFE PATCH — append at end only ===== */
+
+html {
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+body {
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+/* تصحيح wrappers الخاصة بـ Hostinger */
+.block-layout, .block-layout--layout,
+[class*="grid-container"], [class*="zyro-"],
+[class*="builder-block"], [class*="section__"],
+[class*="is-section"], .main-layout,
+.layout-wrapper, .page-wrapper, .site-wrapper {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* حماية إضافية للعناصر الأساسية */
+#oc-nb,
+#oc-hdr,
+.oc-r1,
+.oc-nwrap,
+.oc-nav,
+.oc-ymm,
+#oc-spec-panel {
+  max-width: 100% !important;
+}
+
+/* اللوغو ملاصق لليسار */
+.oc-r1 {
+  padding-left: 0 !important;
+}
+
+/* منع عناصر flex من دفع العرض */
+.oc-nwrap,
+.oc-nav,
+.oc-srch {
+  min-width: 0 !important;
+}
+
+/* منع أي تمدد من القائمة المنسدلة */
+.oc-ddm {
+  max-width: calc(100vw - 24px);
+}
+
+/* إصلاح خاص للهاتف عندما يكون "عرض الكمبيوتر" مفعّل */
+@media (min-width: 961px) and (max-width: 1180px) and (hover: none) and (pointer: coarse) {
+  .oc-tog { display: inline-flex !important; }
+
+  .oc-vdiv { display: none !important; }
+
+  .oc-r1 {
+    padding-right: 16px !important;
+    height: 56px;
+    justify-content: space-between;
+  }
+
+  .oc-nwrap {
+    display: none !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--oc-white);
+    border-top: 1px solid var(--oc-border);
+    border-bottom: 2px solid var(--oc-blue);
+    padding: 12px 16px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    z-index: 100;
+  }
+
+  .oc-nwrap.open {
+    display: flex !important;
+  }
+
+  .oc-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+
+  .oc-lnk, .oc-dtog {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 13.5px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: var(--oc-bg);
+  }
+
+  .oc-lnk:hover, .oc-dtog:hover {
+    background: var(--oc-blue-light);
+  }
+
+  .oc-dd { width: 100%; }
+
+  .oc-ddm {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 4px !important;
+    border-radius: 8px;
+    box-shadow: none;
+    animation: none;
+    border: 1px solid var(--oc-border);
+    border-top: 2px solid var(--oc-blue);
+  }
+
+  .oc-srch {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .oc-srch input {
+    width: 100% !important;
+  }
+
+  .oc-cta {
+    width: 100% !important;
+    text-align: center;
+    margin: 0 !important;
+    padding: 11px 16px;
+    border-radius: 8px;
+  }
+
+  .oc-ymm {
+    padding: 8px 16px;
+    max-height: 120px;
+  }
+
+  .oc-ymm-in {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .oc-ymm-in select {
+    max-width: none;
+    flex: 1 1 30%;
+    min-width: 80px;
+  }
+
+  .oc-ymm-btn {
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  #oc-spec-panel {
+    padding: 8px 16px;
+  }
+}
