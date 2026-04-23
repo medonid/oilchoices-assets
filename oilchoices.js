@@ -672,8 +672,8 @@
           b.classList.remove('active');
         }
       });
-      if (((W.innerWidth <= 960) || ((W.innerWidth <= 1100) && W.matchMedia('(hover: none) and (pointer: coarse)').matches)) && nw.classList.contains('open') &&
-    !nw.contains(e.target) && !tog.contains(e.target)) {
+      if (W.innerWidth <= 960 && nw.classList.contains('open') &&
+          !nw.contains(e.target) && !tog.contains(e.target)) {
         nw.classList.remove('open');
         tog.setAttribute('aria-expanded', 'false');
         tog.setAttribute('aria-label', 'Open menu');
