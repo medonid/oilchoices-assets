@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════
-   OILCHOICES.COM — Header JS v8.1 SECURITY
+   OILCHOICES.COM — Header JS v9.0 SECURITY
+   v9.0: new nav labels, touch detection, responsive fix
    Fixes: XSS via innerHTML, open-redirect, whitelist
    All user-controlled data goes through textContent
    or validated DOM API — zero innerHTML from input
@@ -258,11 +259,6 @@
   /* ════════════════════════════════════════
      SECURITY HELPERS
   ════════════════════════════════════════ */
-
-  /**
-   * FIX #1 — XSS: escape any string before using in HTML context.
-   * Used only where textContent is not an option (e.g. option values).
-   */
   function esc(s) {
     return String(s)
       .replace(/&/g, '&amp;')
@@ -272,10 +268,6 @@
       .replace(/'/g, '&#x27;');
   }
 
-  /**
-   * FIX #2 — Whitelist validation for make/model/year.
-   * Returns sanitized string or null if invalid.
-   */
   function validateYear(v) {
     var n = parseInt(v, 10);
     return (n >= 1990 && n <= 2026) ? String(n) : null;
@@ -289,7 +281,6 @@
     return (typeof v === 'string' && MODELS_SET[mk] && MODELS_SET[mk][v] === true) ? v : null;
   }
 
-  /* ── Other helpers ── */
   function getFallback(make, model) {
     if (EV_MAP[make] && EV_MAP[make][model]) {
       return {
@@ -301,9 +292,6 @@
     return null;
   }
 
-  /**
-   * FIX #3 — buildYears: use DOM API, no string injection.
-   */
   function buildYears(sel) {
     var opt0 = D.createElement('option');
     opt0.value = '';
@@ -317,9 +305,6 @@
     }
   }
 
-  /**
-   * FIX #4 — buildMakes: use DOM API, no string injection.
-   */
   function buildMakes(sel) {
     var opt0 = D.createElement('option');
     opt0.value = '';
@@ -327,14 +312,13 @@
     sel.appendChild(opt0);
     MAKES.forEach(function (m) {
       var opt = D.createElement('option');
-      opt.value = m;           /* value is from internal whitelist — safe */
+      opt.value = m;
       opt.textContent = m;
       sel.appendChild(opt);
     });
   }
 
   function dd(label, titleText, links) {
-    /* Static trusted data only — no user input here */
     return '<div class="oc-dd">' +
       '<button class="oc-dtog" type="button" aria-haspopup="true" aria-expanded="false">' +
         esc(label) + ' <span class="oc-darr" aria-hidden="true">&#9660;</span>' +
@@ -343,7 +327,6 @@
         '<div class="oc-ddt">' + esc(titleText) + '</div>' +
         '<div class="oc-ddl">' +
           links.map(function (l) {
-            /* href values are hardcoded internal URLs — safe */
             return '<a href="' + esc(l[1]) + '" role="menuitem">' + esc(l[0]) + '</a>';
           }).join('') +
         '</div>' +
@@ -351,15 +334,10 @@
     '</div>';
   }
 
-  /**
-   * FIX #5 — shake: never write arbitrary values to style.
-   * Only safe numeric pixel offsets from internal array.
-   */
   function shake(el) {
     var pos = [6, -6, 4, -4, 2, 0];
     var i = 0;
     var t = setInterval(function () {
-      /* pos[i] is always a number from our own array — safe */
       var px = typeof pos[i] === 'number' ? pos[i] : 0;
       el.style.transform = 'translateX(' + px + 'px)';
       if (++i >= pos.length) {
@@ -394,25 +372,18 @@
     return p;
   }
 
-  /**
-   * FIX #6 — pill: use DOM API exclusively, no innerHTML with user data.
-   */
   function pill(label, val, color) {
     var sp = D.createElement('span');
     sp.className = 'oc-sp-pill';
-    /* color comes from internal hardcoded strings — safe, but guard anyway */
     var safeColor = /^#[0-9a-fA-F]{3,6}$/.test(color) ? color : '#0d47a1';
     sp.style.borderLeftColor = safeColor;
-
     var lbl = D.createElement('span');
     lbl.className = 'oc-sp-pill-lbl';
     lbl.style.color = safeColor;
-    lbl.textContent = label;   /* textContent — XSS-safe */
-
+    lbl.textContent = label;
     var valEl = D.createElement('span');
     valEl.className = 'oc-sp-pill-val';
-    valEl.textContent = val;   /* textContent — XSS-safe */
-
+    valEl.textContent = val;
     sp.appendChild(lbl);
     sp.appendChild(valEl);
     return sp;
@@ -423,58 +394,43 @@
     btn.type = 'button';
     btn.className = 'oc-sp-close';
     btn.setAttribute('aria-label', 'Close oil spec panel');
-    btn.textContent = '\u00D7';   /* FIX: textContent instead of innerHTML */
+    btn.textContent = '\u00D7';
     btn.addEventListener('click', hidePanel);
     return btn;
   }
 
-  /**
-   * FIX #7 — showResult: all dynamic values via textContent, never innerHTML.
-   */
   function showResult(yr, mk, mo, s) {
     var p = getPanel();
     p.className = '';
-    /* Safe to clear — then rebuild with DOM API */
     while (p.firstChild) p.removeChild(p.firstChild);
-
     var wrap = D.createElement('div');
-
     var veh = D.createElement('span');
     veh.className = 'oc-sp-veh';
-    /* yr/mk/mo are already validated by whitelist before reaching here */
     veh.textContent = yr + ' ' + mk + ' ' + mo;
     wrap.appendChild(veh);
-
-    /* All spec values come from our internal DB — safe, but textContent anyway */
     wrap.appendChild(pill('Capacity',  s.capacity,  '#0d47a1'));
     wrap.appendChild(pill('Viscosity', s.viscosity, '#d50000'));
     wrap.appendChild(pill('Interval',  s.interval,  '#2e7d32'));
     wrap.appendChild(pill('Standard',  s.api,       '#5a3a00'));
     wrap.appendChild(pill('Filter',    s.filter,    '#37474f'));
-
     var lnk = D.createElement('a');
     lnk.className = 'oc-sp-link';
-    /* href is hardcoded — safe */
     lnk.href = s.note
       ? 'https://www.oilchoices.com/about'
       : 'https://www.oilchoices.com/vehicle-oil-capacity';
     lnk.textContent = s.note ? 'EV Guide \u2192' : 'Full Guide \u2192';
     wrap.appendChild(lnk);
-
     wrap.appendChild(closeBtn());
     p.appendChild(wrap);
   }
 
-  /**
-   * FIX #8 — showError / showMissing: use textContent for all messages.
-   */
   function showError(msg) {
     var p = getPanel();
     p.className = 'oc-sp-err';
     while (p.firstChild) p.removeChild(p.firstChild);
     var wrap = D.createElement('div');
     var sp = D.createElement('span');
-    sp.textContent = msg;          /* textContent — XSS-safe */
+    sp.textContent = msg;
     wrap.appendChild(sp);
     wrap.appendChild(closeBtn());
     p.appendChild(wrap);
@@ -486,7 +442,6 @@
     while (p.firstChild) p.removeChild(p.firstChild);
     var wrap = D.createElement('div');
     var sp = D.createElement('span');
-    /* yr/mk/mo are validated whitelist values — safe; textContent for defence-in-depth */
     sp.textContent = 'Specs for ' + yr + ' ' + mk + ' ' + mo + ' not preloaded \u2014 see full guide.';
     wrap.appendChild(sp);
     var lnk = D.createElement('a');
@@ -499,11 +454,38 @@
   }
 
   /* ════════════════════════════════════════
+     TOUCH DETECTION — FIX v9.0
+     
+     لما المستخدم يدخل "Desktop mode" من الهاتف،
+     المتصفح يرسل viewport عريض (980px+)
+     والـ CSS media queries ما تتحسّش بالفراغ
+     
+     الحل: نكتشف touch device ونضيف class .oc-touch
+     على الـ body، فالـ CSS يطبق mobile layout بقوة
+  ════════════════════════════════════════ */
+  function detectTouch() {
+    var isTouch = (
+      ('ontouchstart' in W) ||
+      (navigator.maxTouchPoints > 0) ||
+      (navigator.msMaxTouchPoints > 0)
+    );
+    var isNarrowReal = W.screen && W.screen.width <= 1024;
+
+    if (isTouch && isNarrowReal) {
+      D.documentElement.classList.add('oc-touch');
+      D.body.classList.add('oc-touch');
+    }
+  }
+
+  /* ════════════════════════════════════════
      INIT
   ════════════════════════════════════════ */
   function init() {
     if (booted || !D.body || D.getElementById('oc-hdr')) return false;
     booted = true;
+
+    /* ── FIX v9.0: Touch detection ── */
+    detectTouch();
 
     /* ── Progress bar ── */
     var pg = D.createElement('div');
@@ -527,7 +509,6 @@
     var nb = D.createElement('div');
     nb.id = 'oc-nb';
     nb.setAttribute('role', 'banner');
-    /* Static trusted content — innerHTML acceptable here */
     nb.innerHTML = '\uD83D\uDD27 Need help choosing the right oil? ' +
       '<a href="https://www.oilchoices.com/contact">Ask our experts \u2192</a>';
     D.body.insertBefore(nb, D.body.firstChild);
@@ -538,7 +519,19 @@
     hdr.setAttribute('role', 'navigation');
     hdr.setAttribute('aria-label', 'Main site navigation');
 
-    /* Static trusted markup — innerHTML acceptable here */
+    /* ════════════════════════════════════════
+       NAV v9.0 — NEW MENU LABELS
+       
+       Old → New:
+       Oil Types    → Learn
+       Oil Capacity → Specs
+       Oil Change   → Maintenance
+       Oil Filter   → Fitment
+       Quick Tips   → Troubleshooting
+       Resources    → Reference
+       
+       Article links unchanged, only group labels renamed
+    ════════════════════════════════════════ */
     hdr.innerHTML =
       '<div class="oc-r1">' +
         '<a class="oc-brand" href="https://www.oilchoices.com/" aria-label="OilChoices home">' +
@@ -556,41 +549,48 @@
         '<div id="ocNW" class="oc-nwrap" role="region" aria-label="Navigation links">' +
           '<nav class="oc-nav" aria-label="Primary">' +
             '<a class="oc-lnk" data-m="/" href="https://www.oilchoices.com/">Home</a>' +
-            dd('Oil Types', 'Oil Types', [
+
+            dd('Learn', 'Learn', [
               ['Oil Type & Capacity',       'https://www.oilchoices.com/oil-type-and-capacity'],
               ['Oil Viscosity Guide',        'https://www.oilchoices.com/oil-viscosity-guide'],
               ['Synthetic vs Conventional',  'https://www.oilchoices.com/synthetic-vs-conventional-oil']
             ]) +
-            dd('Oil Capacity', 'Oil Capacity', [
+
+            dd('Specs', 'Specs', [
               ['Vehicle Oil Capacity',       'https://www.oilchoices.com/vehicle-oil-capacity'],
               ['Engine Oil Capacity',        'https://www.oilchoices.com/engine-oil-capacity'],
               ['Capacity by Make',           'https://www.oilchoices.com/oil-capacity-by-make'],
               ['Capacity by Engine',         'https://www.oilchoices.com/oil-capacity-by-engine']
             ]) +
-            dd('Oil Change', 'Oil Change', [
+
+            dd('Maintenance', 'Maintenance', [
               ['Change Intervals',           'https://www.oilchoices.com/oil-change-intervals'],
               ['Change Cost',                'https://www.oilchoices.com/oil-change-cost'],
               ['Change Coupons',             'https://www.oilchoices.com/oil-change-coupons'],
               ['Light Reset',                'https://www.oilchoices.com/oil-change-light-reset'],
               ['Change FAQ',                 'https://www.oilchoices.com/oil-change-faq']
             ]) +
-            dd('Oil Filter', 'Oil Filter', [
+
+            dd('Fitment', 'Fitment', [
               ['Filter Lookup',              'https://www.oilchoices.com/oil-filter-lookup'],
               ['Cross Reference',            'https://www.oilchoices.com/oil-filter-cross-reference'],
               ['Filter by Vehicle',          'https://www.oilchoices.com/oil-filter-by-vehicle'],
               ['Filter by Engine',           'https://www.oilchoices.com/oil-filter-by-engine']
             ]) +
-            dd('Quick Tips', 'Quick Tips', [
+
+            dd('Troubleshooting', 'Troubleshooting', [
               ['Problems & Symptoms',        'https://www.oilchoices.com/oil-problems-and-symptoms'],
               ['Oil Color Guide',            'https://www.oilchoices.com/engine-oil-color-guide'],
               ['Burning Oil Guide',          'https://www.oilchoices.com/burning-oil-guide'],
               ['Check Engine & Oil',         'https://www.oilchoices.com/check-engine-light-and-oil-issues']
             ]) +
-            dd('Resources', 'Resources', [
+
+            dd('Reference', 'Reference', [
               ['Oil Capacity Chart',         'https://www.oilchoices.com/oil-capacity-chart'],
               ['Oil Type Chart',             'https://www.oilchoices.com/oil-type-chart'],
               ['Oil Glossary',               'https://www.oilchoices.com/engine-oil-glossary']
             ]) +
+
             '<a class="oc-lnk" data-m="/blog"    href="https://www.oilchoices.com/blog">Blog</a>' +
             '<a class="oc-lnk" data-m="/about"   href="https://www.oilchoices.com/about">About</a>' +
             '<a class="oc-lnk" data-m="/contact" href="https://www.oilchoices.com/contact">Contact</a>' +
@@ -618,13 +618,12 @@
 
     nb.insertAdjacentElement('afterend', hdr);
 
-    /* ── FIX #3+4: Populate selects via DOM API after hdr is in DOM ── */
     var yY  = D.getElementById('yY');
     var yM  = D.getElementById('yM');
     var yMo = D.getElementById('yMo');
     var yBtn = D.getElementById('yBtn');
 
-    buildYears(yY);   /* Safe DOM builder — no innerHTML */
+    buildYears(yY);
 
     /* ── Mobile toggle ── */
     var nw  = D.getElementById('ocNW');
@@ -634,7 +633,7 @@
       var open = nw.classList.toggle('open');
       tog.setAttribute('aria-expanded', String(open));
       tog.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      tog.textContent = open ? '\u00D7' : '\u2630';   /* FIX: textContent */
+      tog.textContent = open ? '\u00D7' : '\u2630';
     });
 
     /* ── Dropdowns ── */
@@ -672,12 +671,20 @@
           b.classList.remove('active');
         }
       });
-      if (W.innerWidth <= 960 && nw.classList.contains('open') &&
+      if (W.innerWidth <= 1080 && nw.classList.contains('open') &&
           !nw.contains(e.target) && !tog.contains(e.target)) {
         nw.classList.remove('open');
         tog.setAttribute('aria-expanded', 'false');
         tog.setAttribute('aria-label', 'Open menu');
-        tog.textContent = '\u2630';   /* FIX: textContent */
+        tog.textContent = '\u2630';
+      }
+      /* FIX v9.0: also close on touch devices regardless of viewport width */
+      if (D.body.classList.contains('oc-touch') && nw.classList.contains('open') &&
+          !nw.contains(e.target) && !tog.contains(e.target)) {
+        nw.classList.remove('open');
+        tog.setAttribute('aria-expanded', 'false');
+        tog.setAttribute('aria-label', 'Open menu');
+        tog.textContent = '\u2630';
       }
     });
 
@@ -685,18 +692,15 @@
       if (e.key === 'Escape') closeAllDds();
     });
 
-    /* ── FIX #9 — Search: validate query, open only to oilchoices.com domain ── */
+    /* ── Search ── */
     var si = D.getElementById('ocSI');
     var sb = D.getElementById('ocSB');
 
     function doSearch() {
       var raw = (si.value || '').trim();
-      /* Reject empty or suspiciously long input */
       if (!raw || raw.length > 200) return;
-      /* Strip any protocol/URL attempts — keep plain text only */
       var q = raw.replace(/[<>"'`]/g, '');
       if (!q) return;
-      /* FIX: destination is always our own domain — no open redirect possible */
       var url = 'https://www.google.com/search?q=' +
         encodeURIComponent(q + ' site:oilchoices.com');
       W.open(url, '_blank', 'noopener,noreferrer');
@@ -707,7 +711,7 @@
       if (e.key === 'Enter') doSearch();
     });
 
-    /* ── YMM selects — strict sequential + whitelist ── */
+    /* ── YMM selects ── */
     yM.disabled  = true;
     yMo.disabled = true;
 
@@ -715,7 +719,7 @@
       while (sel.firstChild) sel.removeChild(sel.firstChild);
       var opt = D.createElement('option');
       opt.value = '';
-      opt.textContent = placeholder;   /* FIX: textContent */
+      opt.textContent = placeholder;
       sel.appendChild(opt);
       sel.disabled = true;
     }
@@ -728,13 +732,12 @@
       var sp = D.createElement('span');
       sp.style.cssText = 'font-size:13px;font-weight:600;color:' +
         (type === 'info' ? 'var(--oc-blue)' : 'var(--oc-red)');
-      sp.textContent = msg;   /* FIX: textContent — XSS-safe */
+      sp.textContent = msg;
       wrap.appendChild(sp);
       wrap.appendChild(closeBtn());
       p.appendChild(wrap);
     }
 
-    /* Step 1 — Year selected → unlock Make */
     yY.addEventListener('change', function () {
       hidePanel();
       if (!this.value) {
@@ -742,28 +745,25 @@
         resetSelect(yMo, 'Model');
         return;
       }
-      /* FIX: validate year before trusting */
       if (!validateYear(this.value)) {
         resetSelect(yM, 'Make');
         resetSelect(yMo, 'Model');
         return;
       }
       resetSelect(yM, 'Make');
-      buildMakes(yM);   /* Safe DOM builder */
+      buildMakes(yM);
       yM.disabled = false;
       yM.focus();
       resetSelect(yMo, 'Model');
       showGuide('\u2713 Year selected \u2014 now choose your Make', 'info');
     });
 
-    /* Step 2 — Make selected → unlock Model */
     yM.addEventListener('change', function () {
       hidePanel();
       if (!this.value) {
         resetSelect(yMo, 'Model');
         return;
       }
-      /* FIX #2: whitelist check — reject anything not in MAKES_SET */
       var safeMk = validateMake(this.value);
       if (!safeMk) {
         resetSelect(yMo, 'Model');
@@ -774,8 +774,8 @@
       resetSelect(yMo, 'Model');
       list.forEach(function (v) {
         var opt = D.createElement('option');
-        opt.value = v;           /* from internal whitelist — safe */
-        opt.textContent = v;     /* textContent */
+        opt.value = v;
+        opt.textContent = v;
         yMo.appendChild(opt);
       });
       yMo.disabled = false;
@@ -783,7 +783,6 @@
       showGuide('\u2713 Make selected \u2014 now choose your Model', 'info');
     });
 
-    /* Step 3 — Model selected → ready */
     yMo.addEventListener('change', function () {
       hidePanel();
       if (this.value) {
@@ -812,7 +811,6 @@
       }
     });
 
-    /* Find Oil Spec button */
     yBtn.addEventListener('click', function () {
       var rawYr = yY.value, rawMk = yM.value, rawMo = yMo.value;
 
@@ -832,7 +830,6 @@
         return;
       }
 
-      /* FIX #2: strict whitelist validation before any DB lookup */
       var yr = validateYear(rawYr);
       var mk = validateMake(rawMk);
       var mo = mk ? validateModel(mk, rawMo) : null;
@@ -856,7 +853,7 @@
     });
 
     /* ════════════════════════════════════════
-       SCROLL LOGIC — auto-hide header
+       SCROLL LOGIC
     ════════════════════════════════════════ */
     var HIDE_THRESHOLD = 80;
     var SCROLL_DELTA   = 5;
@@ -900,6 +897,8 @@
 
     W.addEventListener('resize', function () {
       syncNbOffset();
+      /* Re-check touch on resize (orientation change) */
+      detectTouch();
     });
 
     syncNbOffset();
