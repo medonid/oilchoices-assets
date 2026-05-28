@@ -535,10 +535,10 @@
     hdr.innerHTML =
       '<div class="oc-r1">' +
         '<a class="oc-brand" href="https://www.oilchoices.com/" aria-label="OilChoices home">' +
-          '<span class="oc-badge">' +
-            '<img src="https://assets.zyrosite.com/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp"' +
-                 ' alt="OilChoices logo" width="44" height="44" loading="eager" fetchpriority="high">' +
-          '</span>' +
+         '<span class="oc-badge">' +
+  '<img src="https://assets.zyrosite.com/cdn-cgi/image/format=webp,w=88,h=58,fit=contain,q=70/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp"' +
+       ' alt="OilChoices logo" width="44" height="29" loading="eager" decoding="async">' +
+'</span>'  +
           '<span class="oc-btext">' +
             '<span class="oc-btitle">OilChoices</span>' +
             '<span class="oc-bsub">Engine Oil Guides</span>' +
