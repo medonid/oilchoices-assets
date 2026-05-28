@@ -637,17 +637,15 @@ img, video { height: auto; display: block; }
 }
 
 /* ════════════════════════════════════════
-   RESPONSIVE — FIX v9.0
+    mobile "Desktop mode" sends viewport ~980-1024px.
+   Old 960px breakpoint does not trigger — header stretches,
+   and right-side empty space appears because nav items do not fit.
    
-   المشكل: mobile في "Desktop mode" يرسل viewport ~980-1024px
-   فالـ breakpoint القديم 960px ما يتحسش — الـ header يتمدد
-   والفراغ يمين يظهر لأن nav items ما تتسعش
-   
-   الحل: 
-   1) رفعنا breakpoint الأساسي من 960px إلى 1080px
-   2) أضفنا breakpoint وسيط 1200px للـ nav المضغوط
-   3) padding 28px → 20px لحذف الفراغ
-   4) أضفنا touch detection بالـ JS كـ fallback
+   Fix:
+   1) Increased main breakpoint from 960px to 1080px
+   2) Added intermediate 1200px breakpoint for compact nav
+   3) padding 28px → 20px to remove extra space
+   4) Added JS touch detection as fallback
 ════════════════════════════════════════ */
 
 /* ── Intermediate: compact nav for narrow desktop ── */
