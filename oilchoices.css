@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════
-   OILCHOICES.COM — Header CSS v9.0 EDITORIAL
+   OILCHOICES.COM — Header CSS v9.1
    github: medonid/oilchoices-assets
    Design: matches article palette #0d47a1 / #d50000
    Features: auto-hide, editorial, full UX, SEO-safe
-   v9.0: responsive fix (mobile desktop mode), nav rename, logo gap fix
+   v9.1: Ko-fi button, Make placeholder fix
 ═══════════════════════════════════════════════════ */
 
 /* ── Reset & Variables ── */
@@ -129,7 +129,6 @@ img, video { height: auto; display: block; }
   box-shadow: 0 2px 16px rgba(13,71,161,.10);
 }
 
-/* Auto-hide when scrolling down */
 #oc-hdr.oc-hidden {
   transform: translateY(calc(-100% - var(--oc-nb-h)));
 }
@@ -145,7 +144,7 @@ img, video { height: auto; display: block; }
   gap: 6px;
 }
 
-/* ── Brand — FIX: removed margin-right gap ── */
+/* ── Brand ── */
 .oc-brand {
   display: flex;
   align-items: center;
@@ -384,6 +383,45 @@ img, video { height: auto; display: block; }
   background: var(--oc-blue-light);
 }
 
+/* ── Ko-fi button — desktop ── */
+.oc-kofi {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  line-height: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: opacity .18s, transform .15s;
+}
+.oc-kofi:hover {
+  opacity: .88;
+  transform: translateY(-1px);
+}
+.oc-kofi img {
+  height: 32px !important;
+  width: auto !important;
+  display: block;
+}
+
+/* ── Ko-fi icon — mobile (always visible next to logo) ── */
+.oc-kofi-mob {
+  display: none;
+  align-items: center;
+  line-height: 0;
+  flex-shrink: 0;
+  margin-left: 6px;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: opacity .18s;
+}
+.oc-kofi-mob:hover { opacity: .82; }
+.oc-kofi-mob img {
+  height: 26px !important;
+  width: auto !important;
+  display: block;
+}
+
 /* ── CTA Button ── */
 .oc-cta {
   flex-shrink: 0;
@@ -408,7 +446,7 @@ img, video { height: auto; display: block; }
 /* ── Mobile toggle ── */
 .oc-tog {
   display: none;
-  margin-left: auto;
+  margin-left: 6px;
   width: 38px; height: 38px;
   border: 1px solid var(--oc-border);
   border-radius: 6px;
@@ -637,18 +675,8 @@ img, video { height: auto; display: block; }
 }
 
 /* ════════════════════════════════════════
-    mobile "Desktop mode" sends viewport ~980-1024px.
-   Old 960px breakpoint does not trigger — header stretches,
-   and right-side empty space appears because nav items do not fit.
-   
-   Fix:
-   1) Increased main breakpoint from 960px to 1080px
-   2) Added intermediate 1200px breakpoint for compact nav
-   3) padding 28px → 20px to remove extra space
-   4) Added JS touch detection as fallback
+   RESPONSIVE — 1200px compact nav
 ════════════════════════════════════════ */
-
-/* ── Intermediate: compact nav for narrow desktop ── */
 @media (max-width: 1200px) {
   .oc-lnk, .oc-dtog {
     font-size: 11px;
@@ -662,11 +690,16 @@ img, video { height: auto; display: block; }
     font-size: 11px;
     padding: 8px 12px;
   }
+  .oc-kofi img { height: 28px !important; }
 }
 
-/* ── Tablet/Mobile breakpoint: raised to 1080px ── */
+/* ════════════════════════════════════════
+   RESPONSIVE — 1080px tablet/mobile
+════════════════════════════════════════ */
 @media (max-width: 1080px) {
   .oc-tog { display: inline-flex !important; }
+  .oc-kofi { display: none !important; }
+  .oc-kofi-mob { display: inline-flex !important; }
 
   .oc-r1 {
     padding: 0 16px;
@@ -758,8 +791,10 @@ img, video { height: auto; display: block; }
   #oc-spec-panel { padding: 8px 16px; }
 }
 
-/* ── JS-driven touch detection fallback ── */
+/* ── JS touch detection fallback ── */
 .oc-touch .oc-tog { display: inline-flex !important; }
+.oc-touch .oc-kofi { display: none !important; }
+.oc-touch .oc-kofi-mob { display: inline-flex !important; }
 .oc-touch .oc-nwrap { display: none !important; }
 .oc-touch .oc-nwrap.open { display: flex !important; }
 .oc-touch .oc-vdiv { display: none; }
@@ -840,7 +875,7 @@ img, video { height: auto; display: block; }
 .oc-touch .oc-ymm-btn { width: 100%; margin-top: 2px; }
 
 /* ════════════════════════════════════════
-   RESPONSIVE — Mobile 640px
+   RESPONSIVE — 640px mobile
 ════════════════════════════════════════ */
 @media (max-width: 640px) {
   #oc-nb { font-size: 11.5px; padding: 7px 12px; }
@@ -852,6 +887,7 @@ img, video { height: auto; display: block; }
   .oc-sp-pill { padding: 3px 8px; }
   .oc-sp-pill-val { font-size: 12px; }
   #oc-btt { bottom: 16px; right: 16px; width: 40px; height: 40px; }
+  .oc-kofi-mob img { height: 24px !important; }
 }
 
 /* ════════════════════════════════════════
@@ -869,7 +905,6 @@ img, video { height: auto; display: block; }
   outline-offset: 2px;
 }
 
-/* ── Screen reader only ── */
 .oc-sr-only {
   position: absolute;
   width: 1px; height: 1px;
