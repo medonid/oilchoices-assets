@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════
-   OILCHOICES.COM — Header JS v9.0 SECURITY
-   v9.0: new nav labels, touch detection, responsive fix
-   Fixes: XSS via innerHTML, open-redirect, whitelist
-   All user-controlled data goes through textContent
-   or validated DOM API — zero innerHTML from input
+   OILCHOICES.COM — Header JS v9.1
+   v9.1: Ko-fi button, Make placeholder fix, Schema
+   Security: XSS via innerHTML fixed, open-redirect,
+   whitelist — all user input via textContent or
+   validated DOM API, zero innerHTML from input
 ═══════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -20,7 +20,7 @@
     "Ram","Subaru","Tesla","Toyota","Volkswagen","Volvo"
   ];
 
-  /* ── SECURITY: Whitelist set for O(1) lookup ── */
+  /* ── Whitelist set for O(1) lookup ── */
   var MAKES_SET = Object.create(null);
   MAKES.forEach(function (m) { MAKES_SET[m] = true; });
 
@@ -56,7 +56,7 @@
     "Volvo":["S60","S90","V60","V90","XC40","XC60","XC90"]
   };
 
-  /* ── SECURITY: MODELS set per make for whitelist check ── */
+  /* ── MODELS set per make for whitelist check ── */
   var MODELS_SET = Object.create(null);
   Object.keys(MODELS).forEach(function (mk) {
     MODELS_SET[mk] = Object.create(null);
@@ -296,6 +296,8 @@
     var opt0 = D.createElement('option');
     opt0.value = '';
     opt0.textContent = 'Year';
+    opt0.disabled = true;
+    opt0.selected = true;
     sel.appendChild(opt0);
     for (var y = 2026; y >= 1990; y--) {
       var opt = D.createElement('option');
@@ -308,7 +310,9 @@
   function buildMakes(sel) {
     var opt0 = D.createElement('option');
     opt0.value = '';
-    opt0.textContent = 'Make';
+    opt0.textContent = 'Select Make';
+    opt0.disabled = true;
+    opt0.selected = true;
     sel.appendChild(opt0);
     MAKES.forEach(function (m) {
       var opt = D.createElement('option');
@@ -454,14 +458,63 @@
   }
 
   /* ════════════════════════════════════════
-     TOUCH DETECTION — FIX v9.0
-     
-     لما المستخدم يدخل "Desktop mode" من الهاتف،
-     المتصفح يرسل viewport عريض (980px+)
-     والـ CSS media queries ما تتحسّش بالفراغ
-     
-     الحل: نكتشف touch device ونضيف class .oc-touch
-     على الـ body، فالـ CSS يطبق mobile layout بقوة
+     SCHEMA — WebSite + Organization
+  ════════════════════════════════════════ */
+  function injectSchema() {
+    if (D.getElementById('oc-schema')) return;
+    var schema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          '@id': 'https://www.oilchoices.com/#website',
+          'url': 'https://www.oilchoices.com/',
+          'name': 'OilChoices',
+          'description': 'Engine oil guides — capacity, viscosity, oil type, filter lookup, and change intervals for cars and trucks in the USA.',
+          'inLanguage': 'en-US',
+          'potentialAction': {
+            '@type': 'SearchAction',
+            'target': {
+              '@type': 'EntryPoint',
+              'urlTemplate': 'https://www.google.com/search?q={search_term_string}+site:oilchoices.com'
+            },
+            'query-input': 'required name=search_term_string'
+          }
+        },
+        {
+          '@type': 'Organization',
+          '@id': 'https://www.oilchoices.com/#organization',
+          'url': 'https://www.oilchoices.com/',
+          'name': 'OilChoices',
+          'logo': {
+            '@type': 'ImageObject',
+            'url': 'https://assets.zyrosite.com/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp',
+            'width': 200,
+            'height': 200
+          },
+          'sameAs': [
+            'https://ko-fi.com/K0V421TW3W'
+          ],
+          'areaServed': ['US', 'CA', 'GB', 'AU'],
+          'knowsAbout': [
+            'Engine oil capacity',
+            'Oil viscosity grades',
+            'Synthetic motor oil',
+            'Oil change intervals',
+            'Oil filter lookup'
+          ]
+        }
+      ]
+    };
+    var s = D.createElement('script');
+    s.id = 'oc-schema';
+    s.type = 'application/ld+json';
+    s.textContent = JSON.stringify(schema);
+    D.head.appendChild(s);
+  }
+
+  /* ════════════════════════════════════════
+     TOUCH DETECTION
   ════════════════════════════════════════ */
   function detectTouch() {
     var isTouch = (
@@ -470,7 +523,6 @@
       (navigator.msMaxTouchPoints > 0)
     );
     var isNarrowReal = W.screen && W.screen.width <= 1024;
-
     if (isTouch && isNarrowReal) {
       D.documentElement.classList.add('oc-touch');
       D.body.classList.add('oc-touch');
@@ -484,8 +536,8 @@
     if (booted || !D.body || D.getElementById('oc-hdr')) return false;
     booted = true;
 
-    /* ── FIX v9.0: Touch detection ── */
     detectTouch();
+    injectSchema();
 
     /* ── Progress bar ── */
     var pg = D.createElement('div');
@@ -519,30 +571,20 @@
     hdr.setAttribute('role', 'navigation');
     hdr.setAttribute('aria-label', 'Main site navigation');
 
-    /* ════════════════════════════════════════
-       NAV v9.0 — NEW MENU LABELS
-       
-       Old → New:
-       Oil Types    → Learn
-       Oil Capacity → Specs
-       Oil Change   → Maintenance
-       Oil Filter   → Fitment
-       Quick Tips   → Troubleshooting
-       Resources    → Reference
-       
-       Article links unchanged, only group labels renamed
-    ════════════════════════════════════════ */
     hdr.innerHTML =
       '<div class="oc-r1">' +
         '<a class="oc-brand" href="https://www.oilchoices.com/" aria-label="OilChoices home">' +
-         '<span class="oc-badge">' +
-  '<img src="https://assets.zyrosite.com/cdn-cgi/image/format=webp,w=88,h=58,fit=contain,q=70/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp"' +
-       ' alt="OilChoices logo" width="44" height="29" loading="eager" decoding="async">' +
-'</span>'  +
+          '<span class="oc-badge">' +
+            '<img src="https://assets.zyrosite.com/cdn-cgi/image/format=webp,w=88,h=58,fit=contain,q=70/H1TztxDu8joXrzU2/oil-choices-capacity-type-change-logo-3loqmy0CXiVCqOm8.webp"' +
+                 ' alt="OilChoices logo" width="44" height="29" loading="eager" decoding="async">' +
+          '</span>' +
           '<span class="oc-btext">' +
             '<span class="oc-btitle">OilChoices</span>' +
             '<span class="oc-bsub">Engine Oil Guides</span>' +
           '</span>' +
+        '</a>' +
+        '<a class="oc-kofi-mob" href="https://ko-fi.com/K0V421TW3W" target="_blank" rel="noopener noreferrer" aria-label="Support us on Ko-fi">' +
+          '<img src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" alt="Buy Me a Coffee at ko-fi.com" height="26" style="border:0;height:26px;width:auto;">' +
         '</a>' +
         '<span class="oc-vdiv" aria-hidden="true"></span>' +
         '<button id="ocTog" class="oc-tog" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="ocNW">&#9776;</button>' +
@@ -600,6 +642,9 @@
             '<input type="search" id="ocSI" placeholder="Search oil specs..." autocomplete="off" aria-label="Search">' +
             '<button type="button" id="ocSB" aria-label="Submit search">&#128269;</button>' +
           '</div>' +
+          '<a class="oc-kofi" href="https://ko-fi.com/K0V421TW3W" target="_blank" rel="noopener noreferrer" aria-label="Support us on Ko-fi">' +
+            '<img src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" alt="Buy Me a Coffee at ko-fi.com" height="32" style="border:0;height:32px;width:auto;">' +
+          '</a>' +
           '<a class="oc-cta" href="https://www.oilchoices.com/vehicle-oil-capacity">Check Oil Specs</a>' +
         '</div>' +
       '</div>' +
@@ -609,21 +654,41 @@
           '<label class="oc-sr-only" for="yY">Year</label>' +
           '<select id="yY"></select>' +
           '<label class="oc-sr-only" for="yM">Make</label>' +
-          '<select id="yM" disabled><option value="">Make</option></select>' +
+          '<select id="yM" disabled></select>' +
           '<label class="oc-sr-only" for="yMo">Model</label>' +
-          '<select id="yMo" disabled><option value="">Model</option></select>' +
+          '<select id="yMo" disabled></select>' +
           '<button class="oc-ymm-btn" id="yBtn" type="button">Find Oil Spec \u2192</button>' +
         '</div>' +
       '</div>';
 
     nb.insertAdjacentElement('afterend', hdr);
 
-    var yY  = D.getElementById('yY');
-    var yM  = D.getElementById('yM');
-    var yMo = D.getElementById('yMo');
+    var yY   = D.getElementById('yY');
+    var yM   = D.getElementById('yM');
+    var yMo  = D.getElementById('yMo');
     var yBtn = D.getElementById('yBtn');
 
+    /* ── Build Year select — placeholder disabled ── */
     buildYears(yY);
+
+    /* ── Build Make/Model placeholders — disabled + hidden ── */
+    (function () {
+      var o = D.createElement('option');
+      o.value = '';
+      o.textContent = 'Select Make';
+      o.disabled = true;
+      o.selected = true;
+      yM.appendChild(o);
+    }());
+
+    (function () {
+      var o = D.createElement('option');
+      o.value = '';
+      o.textContent = 'Select Model';
+      o.disabled = true;
+      o.selected = true;
+      yMo.appendChild(o);
+    }());
 
     /* ── Mobile toggle ── */
     var nw  = D.getElementById('ocNW');
@@ -671,15 +736,8 @@
           b.classList.remove('active');
         }
       });
-      if (W.innerWidth <= 1080 && nw.classList.contains('open') &&
-          !nw.contains(e.target) && !tog.contains(e.target)) {
-        nw.classList.remove('open');
-        tog.setAttribute('aria-expanded', 'false');
-        tog.setAttribute('aria-label', 'Open menu');
-        tog.textContent = '\u2630';
-      }
-      /* FIX v9.0: also close on touch devices regardless of viewport width */
-      if (D.body.classList.contains('oc-touch') && nw.classList.contains('open') &&
+      var isMobileMode = W.innerWidth <= 1080 || D.body.classList.contains('oc-touch');
+      if (isMobileMode && nw.classList.contains('open') &&
           !nw.contains(e.target) && !tog.contains(e.target)) {
         nw.classList.remove('open');
         tog.setAttribute('aria-expanded', 'false');
@@ -720,6 +778,8 @@
       var opt = D.createElement('option');
       opt.value = '';
       opt.textContent = placeholder;
+      opt.disabled = true;
+      opt.selected = true;
       sel.appendChild(opt);
       sel.disabled = true;
     }
@@ -741,37 +801,37 @@
     yY.addEventListener('change', function () {
       hidePanel();
       if (!this.value) {
-        resetSelect(yM, 'Make');
-        resetSelect(yMo, 'Model');
+        resetSelect(yM, 'Select Make');
+        resetSelect(yMo, 'Select Model');
         return;
       }
       if (!validateYear(this.value)) {
-        resetSelect(yM, 'Make');
-        resetSelect(yMo, 'Model');
+        resetSelect(yM, 'Select Make');
+        resetSelect(yMo, 'Select Model');
         return;
       }
-      resetSelect(yM, 'Make');
+      resetSelect(yM, 'Select Make');
       buildMakes(yM);
       yM.disabled = false;
       yM.focus();
-      resetSelect(yMo, 'Model');
+      resetSelect(yMo, 'Select Model');
       showGuide('\u2713 Year selected \u2014 now choose your Make', 'info');
     });
 
     yM.addEventListener('change', function () {
       hidePanel();
       if (!this.value) {
-        resetSelect(yMo, 'Model');
+        resetSelect(yMo, 'Select Model');
         return;
       }
       var safeMk = validateMake(this.value);
       if (!safeMk) {
-        resetSelect(yMo, 'Model');
+        resetSelect(yMo, 'Select Model');
         showGuide('\u26a0 Invalid make selected', 'error');
         return;
       }
       var list = MODELS[safeMk] || [];
-      resetSelect(yMo, 'Model');
+      resetSelect(yMo, 'Select Model');
       list.forEach(function (v) {
         var opt = D.createElement('option');
         opt.value = v;
@@ -897,7 +957,6 @@
 
     W.addEventListener('resize', function () {
       syncNbOffset();
-      /* Re-check touch on resize (orientation change) */
       detectTouch();
     });
 
