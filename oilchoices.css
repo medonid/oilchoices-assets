@@ -429,12 +429,15 @@ img, video { height: auto; display: block; }
   color: #fff !important;
   font-size: 12px;
   font-weight: 700;
-  padding: 9px 12px;
+  height: 32px;
+  padding: 0 14px;
   border-radius: 6px;
   text-decoration: none !important;
   white-space: nowrap;
   letter-spacing: .2px;
-  margin-left: 4px;
+  margin-left: 0;
+  display: inline-flex;
+  align-items: center;
   transition: background .18s, transform .15s;
   font-family: var(--oc-font);
 }
@@ -470,7 +473,7 @@ img, video { height: auto; display: block; }
   padding: 8px 20px;
   font-family: var(--oc-font);
   transition: padding .3s, max-height .35s, opacity .35s;
-  max-height: 60px;
+  max-height: 100px;
   overflow: hidden;
   opacity: 1;
 }
@@ -787,7 +790,8 @@ img, video { height: auto; display: block; }
   .oc-ymm { padding: 8px 16px; max-height: 120px; }
   .oc-ymm-in { flex-wrap: wrap; gap: 6px; }
   .oc-ymm-in select { max-width: none; flex: 1 1 30%; min-width: 80px; }
-  .oc-ymm-btn { width: 100%; margin-top: 2px; }
+  .oc-ymm-btn { width: auto; flex: 1; margin-top: 2px; }
+  .oc-cta { width: 100%; justify-content: center; margin-top: 2px; height: 36px; font-size: 13px; }
   #oc-spec-panel { padding: 8px 16px; }
 }
 
@@ -872,7 +876,8 @@ img, video { height: auto; display: block; }
 
 .oc-touch .oc-ymm { padding: 8px 16px; max-height: 120px; }
 .oc-touch .oc-ymm-in select { max-width: none; flex: 1 1 30%; min-width: 80px; }
-.oc-touch .oc-ymm-btn { width: 100%; margin-top: 2px; }
+.oc-touch .oc-ymm-btn { width: auto; flex: 1; margin-top: 2px; }
+.oc-touch .oc-cta { width: 100%; justify-content: center; margin-top: 2px; height: 36px; font-size: 13px; }
 
 /* ════════════════════════════════════════
    RESPONSIVE — 640px mobile
