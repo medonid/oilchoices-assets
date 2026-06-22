@@ -645,8 +645,7 @@
           '<a class="oc-kofi" href="https://ko-fi.com/K0V421TW3W" target="_blank" rel="noopener noreferrer" aria-label="Support us on Ko-fi">' +
             '<img src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" alt="Buy Me a Coffee at ko-fi.com" height="32" style="border:0;height:32px;width:auto;">' +
           '</a>' +
-          '<a class="oc-cta" href="https://www.oilchoices.com/vehicle-oil-capacity">Check Oil Specs</a>' +
-        '</div>' +
+          '</div>' +
       '</div>' +
       '<div class="oc-ymm">' +
         '<div class="oc-ymm-in">' +
@@ -658,6 +657,7 @@
           '<label class="oc-sr-only" for="yMo">Model</label>' +
           '<select id="yMo" disabled></select>' +
           '<button class="oc-ymm-btn" id="yBtn" type="button">Find Oil Spec \u2192</button>' +
+          '<a class="oc-cta" href="https://www.oilchoices.com/vehicle-oil-capacity">Check Oil Specs</a>' +
         '</div>' +
       '</div>';
 
